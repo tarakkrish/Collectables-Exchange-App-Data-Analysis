@@ -1,0 +1,141 @@
+# Install the 'rmarkdown' package
+# This package facilitates the creation of dynamic documents and reports in R.
+install.packages("rmarkdown")
+
+# Install the 'openxlsx' package
+# This package enables programmatic handling of Excel files (.xlsx), allowing you to read, write, and modify spreadsheets without needing Excel installed.
+install.packages("openxlsx")
+
+# Install the 'readxl' package
+# This package provides functionality for importing Excel files (.xls and .xlsx) into R, making it useful for dealing with Excel data efficiently.
+install.packages("readxl")
+install.packages("dplyr")
+install.packages("writexl")  
+
+# Load the 'openxlsx' and 'readxl' packages
+# These libraries are essential for reading and writing Excel files in R.
+library("openxlsx")
+library("readxl")
+library(dplyr)
+library(writexl)
+
+# Load the Excel file "D6.xlsx" and assign it to a variable named "D6"
+D6 <- read_excel("D6.xlsx") 
+
+# Retrieve and store the names of sheets from the Excel file "D6.xlsx" in the variable "D6_sheet_names"
+D6_sheet_names <- excel_sheets("D6.xlsx")
+
+# Print the names of the sheets in the "D6" Excel file for inspection
+D6_sheet_names
+
+# Read the first sheet of the "D6.xlsx" file into a variable named "D6_data" for analysis
+D6_data <- read_excel("D6.xlsx", sheet = 1)
+
+# Display the first six rows of the "D6_data" variable to examine its contents
+head(D6_data)
+
+# Load the second sheet of "D6.xlsx" into a variable named "D6_DD" to access the data dictionary
+D6_DD <- read_excel("D6.xlsx", sheet = 2)
+
+# Print the entire content of the "D6_DD" variable to inspect the data dictionary
+D6_DD
+
+# Transpose the "D6_DD" data frame to present it in an alternative format, which might be easier for analysis
+t(D6_DD)
+
+
+# Use the 'rename()' function to create a new data frame with renamed columns
+# This data frame, 'D6_data_renamed_columns', will have descriptive labels for the original column codes.
+D6_data_renamed_columns <- D6_data %>%
+  rename(
+    `How much would you be willing to pay for an app that allows you to buy and sell collectable items?` = Q16,
+    `How much would you be willing to spend per order using an app that allows you to buy and sell collectable items?`= Q17,
+    `How much would you be willing to spend for an exchange fee per item using an app that allows you to buy and sell collectable items?` = Q18,
+    `How much would you be willing to spend per month for a prime membership to an app that allows you to buy and sell collectable items?` = Q19
+  )
+
+
+
+# Install the writexl package
+install.packages("writexl")
+
+# Load the writexl package
+library(writexl)
+
+# Export the 'D6_data_renamed_columns' data frame to an Excel file
+write_xlsx(D6_data_renamed_columns, path = "D6_data_renamed_columns.xlsx")
+
+
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Group by spending per prime and count votes
+spend_per_prime_info <- D6_data_renamed_columns %>%
+  group_by(`How much would you be willing to spend per month for a prime membership to an app that allows you to buy and sell collectable items?`) %>%
+  summarise(`Votes_for_spending_per_prime` = n(), .groups = 'drop')
+
+# Group by spending per order and count votes
+spend_per_order_info <- D6_data_renamed_columns %>%
+  group_by(`How much would you be willing to pay for an app that allows you to buy and sell collectable items?`) %>%
+  summarise(`Votes_for_spending_per_order` = n(), .groups = 'drop')
+
+# Rename the grouping columns for clarity
+colnames(spend_per_prime_info)[1] <- "Prime_Spending"
+colnames(spend_per_order_info)[1] <- "Order_Spending"
+
+# Merge both results
+merged_spend_info <- full_join(spend_per_prime_info, spend_per_order_info, by = character())
+
+# Convert factors to appropriate levels for proper ordering in the plot
+labels_prime <- c('I would not use (0)', '$4.99 or less (1)', '$5 to 6.99 (2)', '$7 to 8.99 (3)', '$9 or more (4)')
+labels_order <- c('I would not use (0)', '$4.99 or less (1)', '$5 to 9.99 (2)', '$10 to 14.99 (3)', '$15 or more (4)')
+merged_spend_info$Prime_Spending <- factor(merged_spend_info$Prime_Spending, levels = labels_prime)
+merged_spend_info$Order_Spending <- factor(merged_spend_info$Order_Spending, levels = labels_order)
+
+# Prepare the data for plotting
+data_prime <- merged_spend_info %>%
+  select(Prime_Spending, Votes_for_spending_per_prime) %>%
+  mutate(Spending_Type = "Prime Membership")
+
+data_order <- merged_spend_info %>%
+  select(Order_Spending, Votes_for_spending_per_order) %>%
+  mutate(Spending_Type = "Order Spending")
+
+colnames(data_prime)[1:2] <- c("Spending", "Votes")
+colnames(data_order)[1:2] <- c("Spending", "Votes")
+
+data <- bind_rows(data_prime, data_order)
+
+# Define colors
+colors <- c('#FF5733', '#33FF57', '#3357FF', '#A333FF', '#FF8C33')
+
+# Create the plot
+ggplot(data, aes(x = Spending_Type, y = Votes, fill = Spending)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = colors, name = "Spending Levels") +
+  labs(title = "Votes for Prime Membership and Order Spending",
+       x = "Spending Type",
+       y = "Count of Votes") +
+  theme_minimal() +
+  theme(legend.position = "top", legend.title = element_blank()) +
+  guides(fill = guide_legend(nrow = 2))
+
+# Save the plot
+ggsave("Stacked_bar_chart_Prime_Membership_Order_Spending.png", width = 10, height = 6)
+
+# Show the plot
+print(
+  ggplot(data, aes(x = Spending_Type, y = Votes, fill = Spending)) +
+    geom_bar(stat = "identity", position = "stack") +
+    scale_fill_manual(values = colors, name = "Spending Levels") +
+    labs(title = "Votes for Prime Membership and Order Spending",
+         x = "Spending Type",
+         y = "Count of Votes") +
+    theme_minimal() +
+    theme(legend.position = "top", legend.title = element_blank()) +
+    guides(fill = guide_legend(nrow = 2))
+)
+

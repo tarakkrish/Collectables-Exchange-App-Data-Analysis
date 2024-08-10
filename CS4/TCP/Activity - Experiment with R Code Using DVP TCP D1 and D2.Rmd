@@ -1,0 +1,156 @@
+# Activity - Experiment with R Code Using DVP TCP D1 and D2
+# Created by Dr. Esther Mead - SAU - LS24
+
+# Warning! Dr. Mead used a random use case to create this R codebook.
+# Each team's use case data output will look different, and each team will need to edit some of the code where noted in this .Rmd codebook.
+# Each team must use their team's D1 and D2 Data Dictionary (DD) sheets to understand their data (as demonstrated by Dr. Mead in the Class Session 4 video called, "Activity - Experiment with Python and R Code Using DVP TCP D1 & D2").
+
+# This activity requires that each team download their D1 and D2 DVP TCP Use Case dataset files from their Team folder on Blackboard and upload them each individually into the files pane along the bottom right of the RStudio Cloud web-based IDE.
+
+# Section 1. Working with your DVP TCP D1 dataset.
+# Use the "install.packages()" function to install packages called "openxlsx" and "readxl" for reading AND writing XLSX files
+install.packages("openxlsx")
+install.packages("readxl")
+
+# Use the "library()" function to load packages called "openxlsx" and "readxl" for reading AND writing XLSX files
+library("openxlsx")
+library("readxl")
+
+# Use the "read_excel()" function to load an xlxs dataset and assign it to a variable called "D1".
+D1 <-read_excel("D1.xlsx") # Change this to your specific path and file name.
+
+# Use the "excel_sheets()" function to get a list of the sheet names of a dataset and assig it to a variable called "D1_sheet_names".
+D1_sheet_names <- excel_sheets("D1.xlsx")
+
+# Call the "D1_sheet_names" variable to print the entire contents to the screen for data inspection.
+D1_sheet_names
+
+# Use the "read_excel()" function to save the D1 "Data" sheet as a variable called "D1_data" for later use
+D1_data <-read_excel("D1.xlsx", sheet=1)
+
+# Use the "head()" function to show the first six rows of the content of "D1_data" for data inspection.
+head(D1_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Use the "read_excel()" function to save the D1 "data dictionary" sheet as a variable called "D1_DD" for later use
+D1_DD <-read_excel("D1.xlsx", sheet=2)
+
+# Call the "D1_DD" variable to print the entire contents to the screen for data inspection.
+D1_DD
+# Warning! Dr. Mead used a random use case to create this "R Code Helper #1-UPGRADED" Rmd file. Your team's use case data will look different.
+
+# Use the "t()" function to Transpose the D1_DD dataframe to give another way to read it in an output cell. You decide which is easier for your and your team to understand.
+t(D1_DD)
+
+#Section 2. Now, try to use the Python code that Dr. Mead wrote above for working with the DVP TCP D1 dataset to repeat the process for working with the D2 dataset in the space below. To guide you, Dr. Mead has inserted code comment lines for helping you to think of what code you need to place where.
+# Use the "read_excel()" function to load an xlxs dataset and assign it to a variable called "D2".
+
+
+# Use the "excel_sheets()" function to get a list of the sheet names of a dataset and assig it to a variable called "D2_sheet_names".
+
+
+# Call the "D2_sheet_names" variable to print the entire contents to the screen for data inspection.
+
+
+# Use the "read_excel()" function to save the D2 "Data" sheet as a variable called "D2_data" for later use
+
+
+# Use the "head()" function to show the first six rows of the content of "D2_data" for data inspection.
+
+
+# Use the "read_excel()" function to save the D2 "data dictionary" sheet as a variable called "D2_DD" for later use
+
+
+# Call the "D1_DD" variable to print the entire contents to the screen for data inspection.
+
+
+# Use the "t()" function to Transpose the D2_DD dataframe to give another way to read it in an output cell. You decide which is easier for your and your team to understand.
+
+
+# Section 3. Merge the data sheets of the D1 and D2 datasets by the common ID column (Note: This code will not work until you complete Section 2 above.)
+# Use the "merge()" function to merge two datasets that were assigned to the variables "D1_data" and "D2_data", respectively, on the common column called "ID".
+D1_D2_data <- merge(D1_data,D2_data,by="ID")
+
+# Use the "head()" function to show the first six rows of the content of merged "D1_D2_data" for data inspection.
+head(D1_D2_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Use the "write.xlsx()" function on the "D1_D2_data" variable holding the dataframe to create a separate XLSX file called "D1_D2_data.xlsx" for later use.
+# After this code executes, you will see the new XLSX file show up in the "Files" pane to the right.
+write.xlsx(D1_D2_data,"D1_D2_data.xlsx")
+
+# Use the "names()" function to get a list of the column names in the merged "D1_D2_Data" dataframe.
+names(D1_D2_data)
+
+# Call the "D1_DD" variable again to print the entire contents to the screen for repeated data inspection.
+D1_DD
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+
+# Extreme Warning! You must edit the executable code in the next section to reflect the specific content that your team's use case contains.
+
+
+# Section 4. Conduct some data engineering to rename the columns based on what the Data Dictionaries for D1 and D2 revealed.
+# Use the "colnames()" function on the "D1_D2" dataframe to create an R vector of elements called "D1_D2_data_renamed_columns" that consists of the explanation labels for the column names separated by commas (,) that are defined in the D1_DD that will replace the short labels that are in the original D1 and D2 data sheets that were included in the creation of the "D1_D2_data" merged dataset.
+colnames(D1_D2_data) <- c('ID','Gender','Ethnicity','Age','Classification','What college does your major belong to?','Income (monthly)', 'Date')
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data. Each team must edit the executable code in the above line to reflect the column explanation labels that are contained in their DDs.
+
+# Use the "head()" function to show the first six rows of the content of revised "D1_D2_data" for data inspection of the results of your data engineering.
+head(D1_D2_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Save the renamed columns to a new variable/data frame called "D1_D2_data_renamed_columns" for later use.
+D1_D2_data_renamed_columns <- D1_D2
+
+# Call the "D1_D2_data_renamed_columns" variable to print the entire contents to the screen for viewing the results of your additional data engineering.
+D1_D2_data_renamed_columns
+
+# Use the "write.xlsx()" function on the "D1_D2_data_renamed_columns" variable holding the dataframe to create a separate XLSX file called "D1_D2_data_renamed_columns.xlsx" for later use.
+# After this code executes, you will see the new XLSX file show up in the content pane to the left.
+write.xlsx(D1_D2_data_renamed_columns, "D1_D2_data_renamed_columns.xlsx")
+
+# Use the "read_excel" function to load your "D1_D2_data_renamed_columns" XLSX file that you created in the above code sets.
+D1_D2_data_renamed_columns <-read_excel("D1_D2_data_renamed_columns.xlsx")
+# WARNING! Change the code in the above code line to your specific path and file name (if different from above).
+
+# Use the "head()" function to show the first six rows of the content of the "D1_D2_data_renamed_columns" variable holding the dataframe for data inspection.
+head(D1_D2_data_renamed_columns)
+# Warning! Dr. Mead used a random use case to create this ipynb codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Do some more data engineering by creating a new dataframe called "Age_Date" by extracting just the "Age" and "Date" columns from the "D1_D2_data_renamed_columns" dataframe.
+Age_Date <- D1_D2_data_renamed_columns[, c("Date", "Age")]
+
+# Use the "head()" function to show the first five rows of the content of the "Age_Date" dataframe for data inspection of your data engineering work.
+head(Age_Date)
+
+# Use the "colnames()" function to output a list of the column names of the "Age_Date" dataframe.
+colnames(Age_Date)
+
+# Use the "summary()" function to get the descriptive statistics for the "Age" column of the "Age_Date" dataframe.
+summary(Age_Date$Age)
+
+# Use the "aggregate()" function to group the revised "Age_Date" dataframe by the "Date" column and use the "mean()" function on the "Age" column to show the average Age and use the "round()" function to remove decimal places and assign that all to a new variable called "processed_Age_Date"
+processed_Age_Date <- aggregate(Age_Date$Age, list(Age_Date$Date), FUN=function(Age) round(mean(Age), 0))
+
+# Use the "head()" function to show the first six rows of the content of the "processed_Age_Date" dataframe to the screen for data inspection of your data engineering and data processing work.
+head(processed_Age_Date)
+
+# Section 5. Now the "Age" and "Date" data is processed so that you can use it to create a Data Visualization (DV) to show the change in Age over time (Date).
+# For this section, work on your own by adapting and inserting below the Python code that Dr. Mead demonstrated during the Class Session 4 video called, "Activity - Experiment with R and Python Code for DVP to Show How Data Change Over Time".
+# Remember to save your codebook and download it when you are finished so that you do not lose your hard work.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# End of codebook

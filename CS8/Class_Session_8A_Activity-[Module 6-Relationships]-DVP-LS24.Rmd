@@ -1,0 +1,447 @@
+# WARNING! Start this Rmd in a New Project in RStudio Cloud. If you did not already start this Rmd from within a New Project in RStudio Cloud, then close it all and open up a New Project in RStudio Cloud, then open this Rmd from within the New Project.
+
+# Class_Session_8A_Activity-[Module 6-Relationships]-DVP-LS24
+
+# M6 - Student Exam Performance dataset - Programming Data Visualizations that Show Relationships
+# Created by Dr. Esther Mead, Assistant Professor of Computer Science, Southern Arkansas University
+# Created for Dr. Esther Mead, SAU MCIS 6333 DVP Long Summer 2024
+# Created July 19, 2024
+
+#========================SECTION SEPARATOR
+
+# Dataset source: https://www.kaggle.com/datasets/whenamancodes/students-performance-in-exams
+# Dataset filename from original source is "exams.csv" but Dr. Mead revised the filename to "Class_Session_8A_Activity.csv".
+
+#========================SECTION SEPARATOR
+
+# All lines beginning with the # symbol are comments and therefore will not be treated as executable code.
+# If you want to "uncomment" a line, simply remove the # symbol from the beginning of the line and it will then be treated as executable code.
+
+#========================SECTION SEPARATOR
+
+# The code lines of this notebook must be run in the order in which they are presented. Running them out of order will cause errors.
+
+#========================SECTION SEPARATOR
+
+# Be sure to properly save all data visualizations that you create in this .Rmd file using whatever method you find to work best for the specific DV (e.g., ggsave, Zoom, etc.).
+
+#========================SECTION SEPARATOR
+
+# IMPORTANT NOTE 1: During the process of loading and/or updating these libraries, if you get a prompt asking you to restart R, select "Yes".
+
+# IMPORTANT NOTE 2: During the process of loading and/or updating these libraries, if you get a prompt at the bottom of your screen within the Console pane asking if you want to use a personal library, type "Yes" and then press enter/return on your keyboard.
+
+# IMPORTANT NOTE 3: During the process of loading and/or updating these libraries, if you get a prompt at the bottom of your screen within the Console pane saying "if you want to use a personal library"Enter one or more numbers, or an empty line to skip updates: ", then position your cursor down there inside of the Console after the colon (:) and press enter/return on your keyboard.
+
+# Running some of these initial code lines will take some time and your patience is required.
+
+# To run the code lines in an orderly fashion, you can position your cursor at the begining of any section that you want to run, and hit control/command and enter/return on your keyboard.
+# You will know when each code line/section is finished executing when you see a blue > symbol in the console pane at the bottom of the integrated development environment (IDE) followed by a blinking cursor.
+
+# Install packages if required
+# (Running this section takes some time and you patience is required. You will know when it is finished when you see a blue > symbol in the console followed by a blinking cursor.)
+# (Ignore warnings.)
+if(!require("rmarkdown")) install.packages("rmarkdown") # An if statement is used for checking the condition (!) that a set of code will require that a package called "rmarkdown" is installed for working with .Rmd files and if so using the install.packages() function to install the package.
+if(!require("ggplot2")) install.packages("ggplot2", dependencies = TRUE) # For installing a package called "ggplot2" for plotting and to ensure that it also installs other things that ggplot2 needs (dependencies).
+if(!require("dplyr")) install.packages("dplyr") # An if statement is used for checking the condition (!) that a set of code will require that a package called "dplyr" is installed for data manipulation and if so using the install.packages() function to install the package.
+if(!require("tidyverse")) install.packages("tidyverse") # An if statement is used for checking the condition (!) that a set of code will require that a package called "tidyverse" is installed for data processing and if so using the install.packages() function to install the package.
+if(!require("scales")) install.packages("scales") # For installing a package called "scales" for creating chart axes labels and legends (internal scaling infrastructure of visualizations).
+if(!require("GGally")) install.packages("GGally") # For installing a package called "GGally" for creating parallel coordinates.
+#if(!require("assertive")) install.packages("assertive") # For installing a package called "assertive" for iteratively checking R code integrity.
+if(!require("testthat")) install.packages("testthat") # For installing a package called "testthat" for iteratively checking our R code for errors.
+if(!require("remotes")) install.packages("remotes") # For installing a package called "remotes" to allow us to grab things that are hosted at a url.
+remotes::install_github("ricardo-bion/ggradar", force=TRUE) # Using a package called remotes for force-installing a package called "ggradar" from a developer's github.
+if(!require("fmsb")) install.packages("fmsb") # For installing a package called "fmsb" for creating radar charts (fmsb stands for "functions for medical statistics book").
+if(!require("gridExtra")) install.packages("gridExtra") # For installing a package called "gridExtra" for use in creating scatter plots.
+if(!require("stringr")) install.packages("stringr") # For installing a package called "stringr" for use in creating scatter plots.
+if(!require("data.table")) install.packages("data.table") # For installing a package called "data.table" for creating pivot tables.
+# Some of these packages may not have been used in the final version of this file.
+
+#========================SECTION SEPARATOR
+
+# Load required packages/libraries
+# If you get an error for any one of these libraries saying something like, "there is no package called "name_of_package", then simply rerun the install line in the previous section for that specific package and then rerun the load line for it in this section.
+library(rmarkdown) # The library() function is used to load a package called "rmarkdown" for working with .Rmd files.
+library(ggplot2) # The library() function is used to load a package called "ggplot2" for plotting.
+library(dplyr) # The library() function is used to load a package called "dplyr" for data manipulation.
+library(tidyverse) # The library() function is used to load a package called "tidyverse" for data processing.
+library(scales) # For loading a library called "scales" for creating chart axes labels and legends (internal scaling infrastructure of visualizations).
+library(GGally) # For loading a library called "GGally" for creating parallel coordinates.
+library(ggradar) # For loading a library called "ggradar" for creating radar charts.
+library(fmsb) # For loading a library called "fmsb" for creating radar charts.
+library(testthat) # For loading a library called "testthat" for iteratively checking our R code for errors.
+library(remotes) # For loading a library called "remotes" to allow us to grab things that are hosted at a url.
+#library(assertive, warn.conflicts = FALSE) # For loading a library called "assertive" to iteratively check R code integrity, but to prevent it from telling you each time there might be a conflict between libraries or packages.
+library(gridExtra) # For loading a library called "gridExtra" for use in creating scatter plots.
+library(stringr) # For loading a library called "stringr" for use in creating scatter plots.
+library(data.table) # For loading a library called "data.table" for creating pivot tables.
+
+# WARNING about this next code line: When this line runs, you get a prompt at the bottom of your screen within the Console pane saying "Would you like to use a personal library instead? (yes/No/cancel) ". When this happens, position your cursor down in the Console after the prompt and type "yes" and then press enter/return on your keyboard (sometimes you have to press enter twice).
+update.packages(ask = FALSE) # Use the update.package() function to designate an argument to prevent being asked if you want to update each package one at a time.
+
+#========================SECTION SEPARATOR
+
+# Do some data inspection. Use the "read.csv()" function to load a CSV dataset file that has the filename "Class_Session_8A_Activity.csv" and assign it to a variable called "data".
+data <- read.csv('Class_Session_8A_Activity.csv')
+
+#========================SECTION SEPARATOR
+
+# Use the "head()" function to show the first 6 rows of a dataset that was assigned to a variable called "data".
+head(data)
+
+#========================SECTION SEPARATOR
+
+# Use the "colnames()" function to get a list of the column names in a data frame that was assigned to a variable called "data".
+colnames(data)
+
+#========================SECTION SEPARATOR
+
+# Do some data processing. Use the "rename()" function to rename selected variables of interest (columns) from a dataset so that we can optimize them for data visualization; overwriting our original data frame variable we called "data".
+data <- data %>% rename("Ethnicity" = "race.ethnicity","Math" = "math.score","Reading" = "reading.score", "Writing" = "writing.score")
+
+# Use the "colnames()" function to get an updated list of the column names in a data frame that was assigned to a variable called "data" (to see the results of our previous renaming work).
+colnames(data)
+
+#========================SECTION SEPARATOR
+
+# Use the "as.factor()" function to set the categorical variables in our dataset as "factor" varibales so that they can be treated appropriately (nominal level of measurement).
+data$gender <- as.factor(data$gender)
+data$Ethnicity <- as.factor(data$Ethnicity)
+data$parental.level.of.education <- as.factor(data$parental.level.of.education)
+data$lunch <- as.factor(data$lunch)
+data$test.preparation.course  <- as.factor(data$test.preparation.course )
+# We may not actually use these later, but it is necessary to know how to perform this factor function on data that is categorical (nominal level of measurement).
+
+#========================SECTION SEPARATOR
+
+# Do some data engineering. Create new features (columns) to add to your dataset.
+# Create a new total score feature based on the three exam scores contained in this dataset.
+# Create a new "Total Score" feature by adding the three exam scores (based on their optimized names Math, Reading, Writing).
+data$Total.Score <- data$Math + data$Reading + data$Writing
+# Create a new average score feature based on the three exam scores contained in this dataset.
+# Create a new "Average Score" feature by dividing the new "Total Score" feature divided by the count of the three exam scores.
+data$Average.Score <- data$Total.Score/3
+# We may not actually use these new variables, but it is necessary to know how to create new features based on calculation such as these and add them to existing datasets.
+
+#========================SECTION SEPARATOR
+
+# Use the "head()" function to show the first 6 rows of the revised dataset that was assigned to a variable called "data" to see the result of our work.
+head(data)
+
+#========================SECTION SEPARATOR
+
+# Make a new data frame with only selected variables of interest from the dataset.
+# Use the "c()" function to create a new data frame called "data_ethnicity" by combining selected columns from the already-existing data frame that was assigned to a variable called "data".
+data_ethnicity <- data[, c("Ethnicity", "Math", "Reading", "Writing")]
+# Call the new "data_ethnicity" variable to view the contents.
+data_ethnicity
+
+#========================SECTION SEPARATOR
+
+# Use the %>% pipe operator to create a pipeline of operations to do a combination of data processing and data engineering.
+# Use the "groupby()" function to create a pivot table as a data frame where we group the data by a categorical (nominal) variable of interest and show the average ("mean) exam scores for each group.
+data_pivot <- data_ethnicity %>% group_by(Ethnicity) %>% 
+  summarise(across(c(Math, Reading, Writing),mean),
+            .groups = 'drop') %>%
+  as.data.frame()
+# Use the "mutate_if()" function to round our exam scores data to just two decimal places (change the number to however many decimals you want).
+data_pivot <- data_pivot %>% mutate_if(is.numeric, ~round(., 2))
+# Call the new "data_pivot" data frame to view the contents.
+data_pivot
+
+#========================SECTION SEPARATOR
+
+# Use a function called "ggparacoord" from the library called "ggplot2" to create the basic structure for a Parallel Coordinates plot using your new specialized data frame that you created above and add some customization components; designate a column to use from the dataset as the groups to compare; set the upper and lower bounds of the scale of the y-axes to be the min and max of all values from the data frame being used; add an optimal customized chart title; and remove the default x-axis and y-axis titles which are unnecessary in this case.
+ggparcoord(data = data_pivot, columns = 2:4, groupColumn = "Ethnicity", scale = "globalminmax", title = "Comparison of Average Exam Scores Based on Ethnicity for a Tested \nStudent Population (masked ethnicity categories)") + theme(plot.title = element_text(size=16)) + theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+# Experiement with the placement of the "\n" new line character in long titles (and even add additional ones if needed).
+# Explore the source from which this code was adapted: https://r-charts.com/ranking/parallel-coordinates-ggplot2/
+# Experiment with different colors for the lines: https://www.rapidtables.com/web/color/RGB_Color.html
+# Advanced students, customize your parallel coordinates plot: https://r-charts.com/ranking/parallel-coordinates-ggplot2/
+# Expand your RStudio Cloud window to fill your entire screen. Expand the boundaries of the plot pane so that your radar chart is expanded to an optimal view. Click "Export" near the top left of the "Plots" pane and select "Save as Image..." and name it appropriately (e.g., "StudentsPerformance-ParallelCoordinatesPlot-R.png". Then find the image file in the "Files" pane and check the box next to it and click the blue "More" gear icon and select "Export" and click "Download" on the window that pops up.
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+# We next want to make a new dataframe from our original dataset so that we can create some scatter plots for showing relationships.
+# Use the "head()" function to recall what our original data frame looked like.
+head(data)
+
+#========================SECTION SEPARATOR
+
+# Now we can decide which columns we want to use to make a new data frame from our original dataset so that we can create some scatter plots for showing relationships.
+scatter <- data[c("Math", "Reading", "Writing")]
+# Call the new "scatter" data frame to view the contents.
+scatter
+
+#========================SECTION SEPARATOR
+
+# To easily generate a scatter plot for each combination of exam scores, we can define the variables that we want to use. There are numerous ways to do this. Here is one way.
+Math = scatter$Math
+Reading = scatter$Reading
+Writing = scatter$Writing
+
+#========================SECTION SEPARATOR
+
+# Use the "ggplot()" function of the library called "ggplot2" to create the basic structure for a scatter plot to compare Math and Reading exam scores to see if there appears to be any relationship; add a customized chart title, x-axis lable, y-axis label; and adjust text font size of each.
+ggplot(scatter, aes(x = Math, y = Reading)) + 
+  geom_point(color = '#FF7F50') + 
+  ggtitle("Relationship Between Math and Reading Exam Scores \nfor a Tested Student Population") + 
+  xlab("Math") + ylab("Reading") + theme(plot.title = element_text(size=18)) + 
+  theme(axis.text.x = element_text(size=10)) + 
+  theme(axis.text.y = element_text(size=10)) + 
+  theme(axis.title.x = element_text(size=14)) + 
+  theme(axis.title.y = element_text(size=14)) + 
+  theme(plot.title = element_text(hjust = 0.5))
+# Repeated here for emphasis: Experiement with the placement of the "\n" new line character in long titles (and even add additional ones if needed).
+# Experiment with customizing colors: http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ and https://www.rapidtables.com/web/color/RGB_Color.html
+# Advanced students customize your scatter plot: https://r-graph-gallery.com/scatterplot.html
+# Fully extract your chart by finding it in the Plots pane (make sure it's the correct optimized one) and clicking "Export" and "Save as Image..." etc.
+
+#========================SECTION SEPARATOR
+
+# Use the "ggplot()" function of the library called "ggplot2" to create the basic structure for a scatter plot to compare Math and Writing exam scores to see if there appears to be any relationship; add a customized chart title, x-axis lable, y-axis label; and adjust text font size of each.
+ggplot(scatter, aes(x = Math, y = Writing)) + 
+  geom_point(color = '#0000FF') + 
+  ggtitle("Relationship Between Math and Writing Exam Scores \nfor a Tested Student Population") + 
+  xlab("Math") + 
+  ylab("Writing") + 
+  theme(plot.title = element_text(size=18)) + 
+  theme(axis.text.x = element_text(size=10)) + 
+  theme(axis.text.y = element_text(size=10)) + 
+  theme(axis.title.x = element_text(size=14)) + 
+  theme(axis.title.y = element_text(size=14))  + 
+  theme(plot.title = element_text(hjust = 0.5))
+# Repeated here for emphasis: Experiement with the placement of the "\n" new line character in long titles (and even add additional ones if needed).
+# Experiment with customizing colors: http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ and https://www.rapidtables.com/web/color/RGB_Color.html
+# Advanced students customize your scatter plot: https://r-graph-gallery.com/scatterplot.html
+# Fully extract your chart by finding it in the Plots pane (make sure it's the correct optimized one) and clicking "Export" and "Save as Image..." etc.
+
+#========================SECTION SEPARATOR
+
+# Use the "ggplot()" function of the library called "ggplot2" to create the basic structure for a scatter plot to compare Reading and Writing exam scores to see if there appears to be any relationship; add a customized chart title, x-axis lable, y-axis label; and adjust text font size of each.
+ggplot(scatter, aes(x = Reading, y = Writing)) + 
+  geom_point(color = '#008B00') + 
+  ggtitle("Relationship Between Reading and Writing Exam Scores \nfor a Tested Student Population") + 
+  xlab("Reading") + 
+  ylab("Writing") + 
+  theme(plot.title = element_text(size=18)) + 
+  theme(axis.text.x = element_text(size=10)) + 
+  theme(axis.text.y = element_text(size=10)) + 
+  theme(axis.title.x = element_text(size=14)) + 
+  theme(axis.title.y = element_text(size=14))  + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Repeated here for emphasis: Experiement with the placement of the "\n" new line character in long titles (and even add additional ones if needed).
+# Experiment with customizing colors: http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ and https://www.rapidtables.com/web/color/RGB_Color.html
+# Advanced students customize your scatter plot: https://r-graph-gallery.com/scatterplot.html
+# Fully extract your chart by finding it in the Plots pane (make sure it's the correct optimized one) and clicking "Export" and "Save as Image..." etc.
+
+#========================SECTION SEPARATOR
+
+# Generate a correlation matrix of R-squared scores, also called correlation coefficients, which allows us to determine if there is any relationship between the variables.
+# Correlation coefficients range from -1 to +1, where the extremes indicate a strong relationship and 0 indicates the absence of a relationship.
+# A negative correlation coefficient indicates that the variables move in oppposite directions in relation to each other (i.e., higher values of one are associated with lower values of the other).
+# A positive correlation coefficient indicates that the variables move in the same direction in relation to each other (i.e., higher values of one are associated with higher values of the other; and lower values of one are associated with lower values of the other).
+# Use the "corplot()" function to generate a correlation matrix of R-squared scores for each variable pair in the data frame called "scatter" that you created in a previous step and assign it to a variable called "corplot".
+corplot <- cor(scatter, method = "pearson")
+# The default correlation analysis method in R is Pearson, and it is the appropriate statistic to use for data that is on the interval or ratio level of measurement.
+# You will need to revise the "cor()" function to include "spearman" in the argument if you are using ordinal data.
+# Call the "corplot" variable to see the results in the console. Use these values in your written Data Insights that accompany your DVs in assignments and reports.
+corplot
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+# Additional Scatter Plot exercises for ADVANCED students (OPTIONAL). Try making scatter plots with multiple variables and with trendlines on the chart using this source: https://r-coder.com/scatter-plot-r/
+# If you use any of these charts in assignments or project, they have to be fully customized with appropriate chart titles, axes titles, legends, etc. and optimized code documentation.
+
+# Additional Scatter Plot exercises for ADVANCED students (OPTIONAL).
+# Not all code steps are listed and you have to rely on what you have learned above in earlier steps (such as renaming variables to optimize for data visualization, etc.).
+# Do not include in your assignment without optimizing all of the chart components by inserting your own code that you learned from the current and past class sessions.
+pairs(~Math + Writing + Reading, data = data,
+       main = "Relationships Between Math, Writing, and Reading Exam Scores \nfor a Tested Student Population")  + 
+       theme(plot.title = element_text(hjust = 0.5))
+# Customize your ScatterplotMatrix: https://r-coder.com/scatter-plot-r/
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+# Radar Charts
+# This next long section explains several steps of two ways to make a Radar Chart in R (fmsb and ggradar). Warning: sometimes these break and results cannot be used in official reports for the workplace.
+
+# WARNING: Teams, these radar charts break all the time. So, don't worry if you can't get them to generate properly.
+
+# First, call the pivot table called "data_pivot" to recall what it looks like.
+data_pivot
+
+# Use the "summary()" function to generate a table of summary statistics of the data frame called "data_pivot". These statistics will be needed below (they can also be used in the written Data Insights of assignments and reports).
+summary(data_pivot)
+
+# Next, optmize the data for making a radar chart by manually creating a new data frame called "exam_scores", defining custom row names for the masked ethnicity groups, and defining data vectors for each of the exams score, Math, Reading, and Writing (get the exact data from the results of the previous call of "data_pivot"); then call the new "exam_scores" data frame to see what it looks like.
+exam_scores <- data.frame(
+    row.names = c("group.A", "group.B", "group.C", "group.D", "group.E"),
+      Math = c(61.63, 63.45, 64.46, 67.36, 73.82),
+      Reading = c(64.67, 67.35, 69.10, 70.03, 73.03),
+        Writing = c(62.67, 65.60, 67.83, 70.15, 71.41)
+)
+exam_scores
+
+# Next, define the variable ranges (maximum and minimum) from your summary(data_pivot) above to be used below for binding the data to a grid.
+max_min <- data.frame(Math = c(80, 55), Reading = c(80, 55), Writing = c(80, 55))
+rownames(max_min) <- c("Max", "Min")
+
+# Bind the variable ranges to the data.
+df <- rbind(max_min, exam_scores)
+df
+
+######################################################### Between this point and below is a kind of iffy set of code that may not work. Just play around with it for fun, but don't use it in assignments or reports unless you can develop it further to optimize it.
+
+# Try it out by plotting just one of the groups.
+groupA <- df[c("Max", "Min", "group.A"), ]
+radarchart(groupA)
+
+# Now, try to use a helper function to produce a radar chart using all of the groups.
+create_beautiful_radarchart <- function(data, color = "#00AFBB", 
+                                        vlabels = colnames(data), vlcex = 0.7,
+                                        caxislabels = NULL, title = NULL, ...){
+  radarchart(
+    data, axistype = 1,
+    # Customize the polygon
+    pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
+    # Customize the grid
+    cglcol = "grey", cglty = 1, cglwd = 0.8,
+    # Customize the axis
+    axislabcol = "grey", 
+    # Variable labels
+    vlcex = vlcex, vlabels = vlabels,
+    caxislabels = caxislabels, title = title, ...
+  )
+}
+
+# Reduce plot margin using the "par()" function.
+op <- par(mar = c(1, 2, 2, 1))
+create_beautiful_radarchart(groupA, caxislabels = c(55, 60, 65, 70, 75))
+par(op)
+
+# Add the rest of the groups to the chart
+# Reduce plot margin using par()
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df, caxislabels = c(55, 60, 65, 70, 75),
+  color = c("#00AFBB", "#E7B800", "#FC4E07", "#72A0C1", "#F19CBB")
+)
+# Add an horizontal legend (this is broken)
+legend(
+  x = "bottom", legend = rownames(df[-c(1,5),]), horiz = TRUE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07", "#72A0C1", "#F19CBB"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+  )
+par(op)
+
+# Create separate charts for each group
+# Define colors and titles
+colors <- c("#00AFBB", "#E7B800", "#FC4E07", "#72A0C1", "#F19CBB")
+titles <- c("group.A", "group.B", "group.C", "group.D", "group.E")
+
+# Reduce plot margin using par()
+# Split the screen in 3 parts
+op <- par(mar = c(1, 1, 1, 1))
+par(mfrow = c(1,5))
+
+# Create the radar chart
+for(i in 1:5){
+  create_beautiful_radarchart(
+    data = df[c(1, 2, 3, i+2), ], caxislabels = c(55, 60, 65, 70, 75),
+    color = colors[i], title = titles[i]
+    )
+}
+par(op)
+
+# Explore the source where this code was adapted from: https://www.datanovia.com/en/blog/beautiful-radar-chart-in-r-using-fmsb-and-ggplot-packages/ and https://r-charts.com/ranking/radar-chart/
+
+######################################################### Between this point and above is a kind of iffy set of code that may not work. Just play around with it for fun, but don't use it in assignments or reports unless you can develop it further to optimize it.
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+
+# Warning! The sections below do not have fully optimized code documentation, and will need to be optimized before use in employee training or workplace reusability.
+
+# Make a Radar Chart with a library called "ggradar" (interesting but has weird things about it).
+# First, use the "mutatue_each()" function to rescale our numeric data to make sure that it will fit nicely on the chart.
+plt <- data_pivot %>% 
+  mutate_each(funs(rescale), -Ethnicity) %>%
+  ggradar(values.radar = c('55', '60', '65', '70'))
+
+# Add a title to the chart and some adjustments.
+plt <- plt + labs(title = "Comparison of Average Exam Scores Based on \nEnthnicity for a Tested Student Population \n(masked ethnicity categories)") + theme(plot.title = element_text(size=16)) + theme(plot.title = element_text(hjust = 0.5))
+plt # To show the chart
+# Repeated here for emphasis: Experiement with the placement of the "\n" new line character in long titles (and even add additional ones if needed).
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+# Warning! The sections below do not have fully optimized code documentation, and will need to be optimized before use in employee training or workplace reusability.
+
+# Make a Chord Diagram
+# To make the Chord Diagram, we need to install and load some additional packages.
+if(!require("chorddiag")) install.packages("chorddiag")
+if(!require("circlize")) install.packages("circlize")
+if(!require("devtools")) install.packages("devtools")
+if(!require("devtools")) install.packages("remotes")
+remotes::install_github("mattflor/chorddiag")
+devtools::install_github("mattflor/chorddiag", build_vignettes = TRUE)
+library("chorddiag")
+library(circlize)
+# Running this code block requires your patience. Wait for it to complete before moving on to the next step.
+
+# Use the "head()" function to look at our original data to see what we have to work with.
+head(data)
+
+# Use the "select()" function to make a new dataframe with specific columns from the dataset: Ethnicity, Math, Reading, and Writing
+ChordDiagram <- select(data, "Ethnicity", "Math", "Reading", "Writing")
+ChordDiagram
+ChordDiagram = ChordDiagram %>%
+  mutate(Ethnicity.r = recode(ChordDiagram$Ethnicity,
+    "group A" = 0, "group B" = 1, "group C" = 2, "group D" = 3, "group E" = 4))
+head(ChordDiagram)
+ChordDiagram <-ChordDiagram[,c(which(colnames(ChordDiagram)=="Ethnicity.r"),which(colnames(ChordDiagram)!="Ethnicity.r"))]
+head(ChordDiagram)
+
+ChordDiagram_pivot <- ChordDiagram %>% group_by(Ethnicity.r) %>% 
+  summarise(across(c(Math, Reading, Writing),mean),
+            .groups = 'drop') %>%
+  as.data.frame()
+
+ChordDiagram_pivot = as.matrix(ChordDiagram_pivot)
+row.names(ChordDiagram_pivot) = c("group A", "group B", "group C", "group D", "group E")
+chorddiag(ChordDiagram_pivot, type = "bipartite", showTicks = F, groupnameFontsize = 14, groupnamePadding = 10, margin = 90,)
+# The "chorddiag" library doen't yet have a title function. Your chord diagram will show up in the "Viewer" tab along the right and it will be interatctive (i.e., you can hover over it with your mouse and it will display the data points).
+
+#========================SECTION SEPARATOR
+
+# There is another in-development function for making a chord diagram actually called "chordDiagram()" from the "circlize" library. Do not use it in assignments or reports unless you are able to develop it to optimization.
+# Here is the bare bones of it below.
+chordDiagram(ChordDiagram_pivot)
+# Try getting it to work from: https://r-graph-gallery.com/123-circular-plot-circlize-package-2.html
+# Or try getting it to work from: https://jokergoo.github.io/circlize_book/book/the-chorddiagram-function.html
+
+#========================SECTION SEPARATOR
+#========================SECTION SEPARATOR
+
+# Clear all plots; use this if you get so many plots that you can't find what you need; then just regenerate the plots that you need by rerunning their specific code sets.
+# Warning! If you run line 407, all plots will be removed from your "Plots" tab. Sometimes we do this when we have to many DVs and we don't want to accidentally use a broken one in professional reports, and instead want to regenerate the ones that we know are optimal for use.
+try(dev.off(dev.list()["RStudioGD"]), silent=TRUE) # Attempt to clear all plots (suppress error if no plots exist)
+
+# End of codebook

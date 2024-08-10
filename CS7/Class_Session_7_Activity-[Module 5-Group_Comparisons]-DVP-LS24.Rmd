@@ -1,0 +1,217 @@
+# Class_Session_7_Activity-[Module 5-Group Comparisons]-DVP-LS24
+
+# M5 - Cricket dataset - Programming Data Visualizations that Show Group Comparisons
+# Created by Dr. Esther Ledelle Mead, Southern Arkansas University, Assistant Professor of Computer Science
+# Created for Dr. Esther Mead, SAU Data Visualization Programming, Long Summer 2024
+# Created July 13, 2024
+
+#========================SECTION SEPARATOR
+
+# Dataset source: https://www.kaggle.com/datasets/iamsouravbanerjee/ipl-player-performance-dataset?resource=download
+# Original dataset from source is called, “Most Runs All Seasons Combine.csv”; the filename was changed here to "Class_Session_7_Activity.csv" for convenience.
+
+#========================SECTION SEPARATOR
+
+# Explanation of Example Use Case used in these exercises:
+### A new brand of sports drink wants to hire a top cricket player to be their "celebrity endorser" for their product so that they can increase sales.
+### They want to select three players to approach with a potential deal.
+### Which three players are good candidates to suggest to the company and why?
+
+#========================SECTION SEPARATOR
+
+# Install packages if required
+if(!require("rmarkdown")) install.packages("rmarkdown") # An if statement is used for checking the condition (!) that a set of code will require that a package called "rmarkdown" is installed for working with .Rmd files and if so using the install.packages() function to install the package.
+if(!require("ggplot2")) install.packages("ggplot2") # An if statement is used for checking the condition (!) that a set of code will require that a package called "ggplot2" is installed for plotting and if so using the install.packages() function to install the package.
+if(!require("dplyr")) install.packages("dplyr") # An if statement is used for checking the condition (!) that a set of code will require that a package called "dplyr" is installed for data manipulation and if so using the install.packages() function to install the package.
+if(!require("hrbrthemes")) install.packages("hrbrthemes") # For installing a package called "hrbrthemes" for using ggplot2 theme components.
+if(!require("viridis")) install.packages("viridis") # For installing a package called "viridis" for using color maps.
+if(!require("scales")) install.packages("scales") # For installing a package called "scales" for creating chart axes labels and legends.
+if(!require("plotly")) install.packages("plotly") # For installing a package called "plotly" for creating interactive charts.
+if(!require("heatmaply")) install.packages("heatmaply") # For installing a package called "heatmaply" for creating interactive heatmaps.
+
+#========================SECTION SEPARATOR
+
+# Load required libraries
+library(rmarkdown) # The library() function is used to load a package called "rmarkdown" for working with .Rmd files.
+library(ggplot2) # The library() function is used to load a package called "ggplot2" for plotting.
+library(dplyr) # The library() function is used to load a package called "dplyr" for data manipulation.
+library(hrbrthemes) # For loading a package called "hrbrthemes" for using ggplot2 theme components.
+library(viridis) # For loading a package called "viridis" for using color maps.
+library(scales) # For loading a package called "scales" for creating chart axes labels and legends.
+library(plotly) # For loading a package called "plotly" for creating interactive charts.
+library("heatmaply") # For loading a package called "heatmaply" for creating interactive heatmaps.
+
+#========================SECTION SEPARATOR
+
+# Use the read.csv() function to load a CSV dataset file that has the filename "Cricket.csv" and assign it to a variable called "data".
+data <-read.csv("Class_Session_7_Activity.csv")
+
+#========================SECTION SEPARATOR
+
+# Use the head() function to show the first 8 rows of a dataset that was assigned to a variable called "data".
+head(data, 8)
+
+#========================SECTION SEPARATOR
+
+# The next few code sections introduces some new-to-you code lines and documentation lines for doing some required data processing with this dataset.
+
+#========================SECTION SEPARATOR
+
+# Use a function called "mutate()" to remove problematic characters such as asterisks (*) from the data of a selected column from the df (remove it and replace it with nothing).
+data <- data %>% mutate(HS = gsub("\\*", "", HS))
+
+# Use a function called "head()" the see the results of your "mutate" function executed in a previous executable code (To check to see if the problematic characters were successfully removed from the intended column data.)
+head(data)
+
+# The dataset is quite large and can be cumbersome and hard to visualize in terms of getting any actual data insights from it for the purposes of the Example Use Case (explained above).
+# There are many ways to process the dataset to be able to answer the questions from the example use case. The following series of code lines represents one way.
+# Since the sports drink company only wants to consider from among three cricket players, we can process the data to order by performance.
+
+# Use a function called "order()" to order the data by a specific column in a specific way. The order function does so in ascending by default (lowest first), so we just set "decreasing" to True to make it order by descending instead (highest first).
+data <- data[order(data$Avg, decreasing = TRUE), ]
+
+# Use a function called "head()" the check the results of your "order" function.
+head(data)
+
+# Since the sports drink company only wants to consider from among three cricket players, we can process the data to only look at the performance of the Top 20 players.
+# Now let's add some code to what we wrote above to create a new data frame that repeats that sort and then selects just the top 20 players of the dataset (you can play around with any number though).
+
+# Use a function called "order()" to order the data by a specific column in descending order; adding the "head()" function to only select the top 20 rows (being the 20 highest values in the dataset for that specified column), and assigning it to a new data frame called "Top20".
+Top20 <- head(data[order(data$Avg, decreasing=TRUE), ], 20)
+
+# Call the new "Top20" data frame to see if the contents look correctly generated.
+Top20
+
+# It does look correct, but we have some repeat player names in there, and we don't want to have repeat names (even though they have different data) in our data visualizations (DVs).
+# So, let's write some code to drop the row(s) that has/have the lowest Avg score of the repeat players that we see in our Top20 list by using their "ID".
+# Write a conditional statement using the "!" and "==" operators to regenerate the "Top20" data frame without including specified values for a specific column. (This will remove the two rows of player, "MS Dhoni" with the lowest of their three Avg values.)
+Top20 <- Top20[!(Top20$ID=="1434" | Top20$ID=="897"),]
+
+# Call the newly generated "Top20" data frame to see if the contents look correctly generated.
+Top20
+
+# From the above output, we can see that we, unfortunately, now only have 18 rows in our Top20.
+# Without having had executed the above steps, however, we would have not have been able to determine and identify the ideal data targeted for removal.
+# Regardless, now we know what we need to target for removal, so, let's repeat some code to redo some of our operations in a different order.
+# Let's start again with our original data frame and drop the Dhoni rows from that data frame and overwrite it. (We can get the specific "ID"s of these rows targeted for removal from looking at the previous output that we had.). Also from the output from the previous Top20 data frame call above we can actually see that there is another repeat name, "Wriddhiman Saha", so we need to repeat the steps needed to deal with the issue before we move on to create our DVs.
+
+# Write another conditional statement using the "!" and "==" operators to regenerate the "Top20" data frame to remove the two rows of player, "MS Dhoni" with the lowest of their three Avg values and remove the row of player, "Wriddhiman Saha" with the lowest of their two Avg values.
+data <- data[!(data$ID=="1434" | data$ID=="897" | data$ID=="499"),]
+
+# Now let's repeat our sort and selection of just the Top20 and see if it looks correct.
+# Use a function called "order()" to order the data by a specific column in descending order; adding the "head()" function to only select the top 20 rows (being the 20 highest values in the dataset for that specified column), and assigning it to a new data frame called "Top20".
+Top20 <- head(data[order(data$Avg, decreasing=TRUE), ], 20)
+
+# Call the newly generated "Top20" data frame to see if the contents look correctly generated.
+Top20
+
+# At this point, you will see from the resultant output of the most recent call of Top20 above that it now looks correct (we have 20 non-repeating players sorted by Avg descending), and we can now move on from data processing to data visualization (DV).
+
+#========================SECTION SEPARATOR
+
+# Use a function called "plot_ly()" to map R objects to an interactive charting library called "plotly.js" to create the basic structure for creating an interactive Stacked Area Chart and add some customization components; designate an X variable (in this example, we want it to be the players); designate difference variables for Y, each as a added stack component to the DV using a function called "add_trace()"; designate a color for each Y stack and an optimal display name; add a chart title; remove default x-axis title; rotate xticks; add optimal y-axis title; adjust the plot margins; remove plot grids; assign the entire DV code to a variable called "fig".
+# Experiment with colors: http://www.sthda.com/english/wiki/colors-in-r
+# You can add as many stacks as you want to, keeping in mind that adding too many will render the chart difficult to read and therefore ineffective for decision making.
+fig <- plot_ly(Top20, x = ~Player, y = ~Avg, name = 'Average Score', type = 'scatter', mode = 'none', stackgroup = 'one', fillcolor = '#F5FF8D')
+fig <- fig %>% add_trace(y = ~Runs, name = 'Runs', fillcolor = '#50CB86')
+fig <- fig %>% add_trace(y = ~SR, name = 'Strike Rate', fillcolor = '#4C74C9')
+fig <- fig %>% layout(title = 'Strike Rate and Runs of Top 20 Cricket Players Based on Average Score', margin=(b=5),
+         xaxis = list(title = "",
+                      showgrid = FALSE, tickangle=45),
+         yaxis = list(title = "Value on Record",
+                      showgrid = FALSE))
+
+# Call the "fig" variable to get the stacked area chart DV to show up in the "Plots" tab.
+fig
+
+### Data Insights:
+### The above stacked area chart data visualization (DV) allows for comparison of cricket players among the Top 20 players based on Average Score. For example, Luke Pomersbach is the top player when the comparison is based on the initial metric of Average Score. Virat Kohli is the top player when the player comparison is based on Runs. And, Chris Gayle is the top player when the comparison is based on Strike Rate. Therefore, these three players would be good candidates to suggest to the company to approach with a potential deal to be the "celebrity endorser" for the new brand of sports drink.
+
+# Don't forget to save your Stacked Area Chart DV as a stand-alone png or jpg file. Call it "Cricket-Stacked_Area_Chart-R". (Discussions of how to optimally save an R chart from within the RStudio Cloud IDE take place during thre previous class sessions.)
+
+# Note: This Stacked Area Chart is interactive while in RStudio (you can hover over points in the chart and it will reveal the data points), but this is not the case after you download your image as a png or jpg.
+# Explore the source of where some of this code came from: https://plotly.com/r/filled-area-plots/
+# Experiment with customizing your stacked area chart here: https://r-graph-gallery.com/stacked-area-graph.html
+
+#========================SECTION SEPARATOR
+
+# Use a function called "plot_ly()" to map R objects to an interactive charting library called "plotly.js" to create the basic structure for creating an interactive Stacked Bar Chart and add some customization components; designate an X variable (in this example, we want it to be the players); designate difference variables for Y, each as a added stack component to the DV using a function called "add_trace()"; designate a color for each Y stack and an optimal display name; add a chart title; remove default x-axis title; rotate xticks; add optimal y-axis title; adjust the plot margins; remove plot grids; assign the entire DV code to a variable called "fig" (or some other variable name if you want to prevent overwriting).
+# Experiment with colors: http://www.sthda.com/english/wiki/colors-in-r
+# You can add as many stacks as you want to, keeping in mind that adding too many will render the chart difficult to read and therefore ineffective for decision making.
+fig1 <- plot_ly(Top20, x = ~Player, y = ~Avg, name = 'Average Score', type = 'bar', mode = 'none', stackgroup = 'one', fillcolor = '#F5FF8D')
+fig1 <- fig1 %>% add_trace(y = ~Runs, name = 'Runs', fillcolor = '#50CB86')
+fig1 <- fig1 %>% add_trace(y = ~SR, name = 'Strike Rate', fillcolor = '#4C74C9')
+fig1 <- fig1 %>% layout(title = 'Strike Rate and Runs of Top 20 Cricket Players Based on Average Score', margin=(b=5), barmode = 'stack', 
+         xaxis = list(title = "",
+                      showgrid = FALSE, tickangle=45),
+         yaxis = list(title = "Value on Record",
+                      showgrid = FALSE))
+# You can ignore the warnings that are outputted in the Console after the above code executes.
+
+# Call the "fig" variable (or whatever you called it) to get the stackd bar chart DV to show up in the "Plots" tab.
+fig1
+
+### Data Insights:
+### The above stacked bar chart data visualization (DV) provides additional visual evidence of comparison of cricket players among the Top 20 players based on Average Score. Again it is revealed that Luke Pomersbach is the top player when the comparison is based on the initial metric of Average Score. Virat Kohli is again seen as the top player when the player comparison is based on Runs. And, Chris Gayle is again seen as the top player when the comparison is based on Strike Rate. This DV, therefore, provides additional support for making the recommendation that these three players would be good candidates to suggest to the company to approach with a potential deal to be the "celebrity endorser" for the new brand of sports drink.
+
+# Don't forget to save your Stacked Bar Chart DV as a stand-alone png or jpg file. Call it "Cricket-Stacked_Bar_Chart-R".
+
+# Note: This Stacked Bar Chart is interactive while in RStudio (you can hover over points in the chart and it will reveal the data points), but this is not the case after you download your image as a png or jpg.
+# Explore the source of where some of this code was adapted from: https://plotly.com/r/filled-area-plots/ and https://stackoverflow.com/questions/44929859/plotly-stacked-bar-chart-with-over-100-categories
+# Experiment with customizing your stacked bar chart here: https://r-graph-gallery.com/stacked-barplot.html
+
+#========================SECTION SEPARATOR
+
+# Heatmap: You can add as many variables to be the columns of your heatmap table as you want to, keeping in mind that adding too many will render the chart difficult to read and therefore ineffective for decision making.
+
+# Create a new data frame to select only specific columns of data for your heatmaps.
+data_heat <- Top20[,c("Player", "Avg", "Runs", "SR")]
+# Create another new data frame to designate the data that you want to use to fill the values of the cells of the heatmap.
+data_heats <-Top20[,c("Avg", "Runs", "SR")]
+# Use the "rownames()" function to designate which variable to use as the "rows" in the heatmap table. You can experiment with using different variables from the dataset. (In our example, we want to see the 20 player names as the rows of the DV.)
+rownames(data_heat) <- data_heat$Player
+
+
+# Below are two different ways to make a heatmap in R.
+
+# Heatmap 1
+# Use a package called "heatmaply" to create the basic structure for a Heatmap using the two new data frames that you made in the previous code lines and add some customization components; add a title and adjust the margins.
+heatmaply(data_heat, cellnote = data_heats, main="Strike Rate and Runs of Top 20 Cricket Players Based on Average Score", margins=list(t=5))
+
+### Data Insights:
+### The above heatmap data visualization (DV) provides additional visual evidence of comparison of cricket players among the Top 20 players based on Average Score. The heatmap also allows for specificty in the recommendation. Again it is revealed that Luke Pomersbach is the top player when the comparison is based on the initial metric of Average Score, having the highest average score out of the group with 152. Virat Kohli is again seen as the top player when the player comparison is based on Runs, with 973. And, Chris Gayle is again seen as the top player when the comparison is based on Strike Rate, with 183.13. This DV, therefore, also provides additional support for making the recommendation that these three players would be good candidates to suggest to the company to approach with a potential deal to be the "celebrity endorser" for the new brand of sports drink.
+
+# Don't forget to save your Heatmap 1 DV as a stand-alone png or jpg file. Call it "Cricket-Heatmap1-R".
+
+# Explore the source of where some of this code was adapted from: https://www.datanovia.com/en/blog/how-to-create-a-beautiful-interactive-heatmap-in-r/
+# OPTIONAL: Advanced students, try experimenting with the heatmap in terms of adding normalization and other tweaks: https://www.datanovia.com/en/blog/how-to-create-a-beautiful-interactive-heatmap-in-r/ and https://r-graph-gallery.com/215-interactive-heatmap-with-plotly.html
+
+#========================SECTION SEPARATOR
+
+# Heatmap 2
+# Use a component of the ggplot2 package called "ggheatmap" to create the basic structure for a Heatmap using the two new data frames that you made in the previous code lines and add some customization components; add a title and adjust the margins.
+ggheatmap(data_heat, main="Strike Rate and Runs of Top 20 Cricket Players Based on Average Score", widths=NULL, heights=NULL, row_dend_left=FALSE, high_colorbar=FALSE, margins=list(t=5))
+
+# This ggheatmap DV technique ("Heatmap 2") is still in-dev (in development) and may break (for example, the title does not get added to the DV even though we add the argument); Explore the source of where some of this code was adapted from if you need/want to try to figure it out: https://www.datanovia.com/en/blog/how-to-create-a-beautiful-interactive-heatmap-in-r/
+# OPTIONAL: Advanced students, try experimenting with the heatmap in terms of adding normalization and other tweaks: https://www.datanovia.com/en/blog/how-to-create-a-beautiful-interactive-heatmap-in-r/ and https://r-graph-gallery.com/215-interactive-heatmap-with-plotly.html
+
+# Don't forget to save your Heatmap 2 DV as a stand-alone png or jpg file. Call it "Cricket-Heatmap2-R".
+
+#========================SECTION SEPARATOR
+
+# The way we found duplicates above involved some manual steps that relied on human vision and inspection.
+# Another way to find duplicates and create a data frame of them for inspection is to use an R function called duplicated().
+# Try the following experiment by running each of the separate code lines below individually so that you can see the output of the results one at a time.
+data1 <- read.csv("Cricket.csv") # Load our original dataset
+data1 <- data1[order(-data1$Avg), ] # Sort it ascending on Avg column
+Top20b <- df[1:20, ] # Create our Top 20 subset
+Top20x <- Top20b[duplicated(Top20b$Player) | duplicated(Top20b$Player, fromLast = TRUE), ] # Find duplicates and store all of them (each instance) in a variable.
+print(Top20x) # Look at the contents of the variable where the duplicates are stored
+# Note: In this use case, we still need to rely on human vision and inspection to make decision as to which duplicate to keep and which to omit from our subsequent analysis.
+#       Recall, our decision was to keep the rows with the highest "Avg" value when there are rows with duplicate "Player" values, and remove the other rows using the respective "ID" values.
+
+
+# Next, get with your team to try to adapt the code provided in these exercises to generate the respective DVs with your assigned Use Case datasets.
+# Important Note: There will be no duplicates, however, nor weird characters to deal with in your assigned Use Case datasets.
+
+# End of file

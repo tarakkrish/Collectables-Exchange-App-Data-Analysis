@@ -1,0 +1,254 @@
+
+# Section 1. Working with your DVP TCP D1 dataset.
+# Use the "install.packages()" function to install packages called "openxlsx" and "readxl" for reading AND writing XLSX files
+if (!require("openxlsx")) install.packages("openxlsx")
+if (!require("readxl")) install.packages("readxl")
+if (!require("DescTools")) install.packages("DescTools")
+if(!require("ggplot2")) install.packages("ggplot2")
+if (!require("lubridate")) install.packages("lubridate")
+if(!require("dplyr")) install.packages("dplyr")
+if (!require("tidyr")) install.packages("tidyr")
+
+
+# Use the "library()" function to load packages called "openxlsx" and "readxl" for reading AND writing XLSX files
+library("openxlsx")
+library("readxl")
+library(ggplot2)
+library("dplyr")
+library("DescTools")
+# Load required libraries
+library("tidyr")
+library("lubridate")
+
+# Use the "read_excel()" function to load an xlxs dataset and assign it to a variable called "D1".
+D1 <-read_excel("O-Collectables Exchange App-D1.xlsx") # Change this to your specific path and file name.
+
+# Use the "excel_sheets()" function to get a list of the sheet names of a dataset and assig it to a variable called "D1_sheet_names".
+D1_sheet_names <- excel_sheets("O-Collectables Exchange App-D1.xlsx")
+
+# Call the "D1_sheet_names" variable to print the entire contents to the screen for data inspection.
+D1_sheet_names
+
+# Use the "read_excel()" function to save the D1 "Data" sheet as a variable called "D1_data" for later use
+D1_data <-read_excel("O-Collectables Exchange App-D1.xlsx", sheet=1)
+
+# Use the "head()" function to show the first six rows of the content of "D1_data" for data inspection.
+head(D1_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Use the "read_excel()" function to save the D1 "data dictionary" sheet as a variable called "D1_DD" for later use
+D1_DD <-read_excel("O-Collectables Exchange App-D1.xlsx", sheet=2)
+
+# Call the "D1_DD" variable to print the entire contents to the screen for data inspection.
+D1_DD
+# Warning! Dr. Mead used a random use case to create this "R Code Helper #1-UPGRADED" Rmd file. Your team's use case data will look different.
+
+# Use the "t()" function to Transpose the D1_DD dataframe to give another way to read it in an output cell. You decide which is easier for your and your team to understand.
+t(D1_DD)
+
+#Section 2. Now, try to use the Python code that Dr. Mead wrote above for working with the DVP TCP D1 dataset to repeat the process for working with the D2 dataset in the space below. To guide you, Dr. Mead has inserted code comment lines for helping you to think of what code you need to place where.
+# Use the "read_excel()" function to load an xlxs dataset and assign it to a variable called "D2".
+D2 <-read_excel("O-Collectables Exchange App-D2.xlsx")
+
+# Use the "excel_sheets()" function to get a list of the sheet names of a dataset and assig it to a variable called "D2_sheet_names".
+D2_sheet_names <- excel_sheets("O-Collectables Exchange App-D2.xlsx")
+
+# Call the "D2_sheet_names" variable to print the entire contents to the screen for data inspection.
+D2_sheet_names
+
+# Use the "read_excel()" function to save the D2 "Data" sheet as a variable called "D2_data" for later use
+D2_data <-read_excel("O-Collectables Exchange App-D2.xlsx", sheet=1)
+
+# Use the "head()" function to show the first six rows of the content of "D2_data" for data inspection.
+D2_data
+
+# Use the "read_excel()" function to save the D2 "data dictionary" sheet as a variable called "D2_DD" for later use
+D2_DD <-read_excel("O-Collectables Exchange App-D2.xlsx", sheet=2)
+
+# Call the "D2_DD" variable to print the entire contents to the screen for data inspection.
+D2_DD
+
+# Use the "t()" function to Transpose the D2_DD dataframe to give another way to read it in an output cell. You decide which is easier for your and your team to understand.
+t(D2_DD)
+
+# Section 3. Merge the data sheets of the D1 and D2 datasets by the common ID column (Note: This code will not work until you complete Section 2 above.)
+# Use the "merge()" function to merge two datasets that were assigned to the variables "D1_data" and "D2_data", respectively, on the common column called "ID".
+D1_D2_data <- merge(D1_data, D2_data, by="ID")
+
+# Use the "head()" function to show the first six rows of the content of merged "D1_D2_data" for data inspection.
+head(D1_D2_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Use the "write.xlsx()" function on the "D1_D2_data" variable holding the dataframe to create a separate XLSX file called "D1_D2_data.xlsx" for later use.
+# After this code executes, you will see the new XLSX file show up in the "Files" pane to the right.
+write.xlsx(D1_D2_data, "D1_D2_data.xlsx")
+
+# Use the "names()" function to get a list of the column names in the merged "D1_D2_Data" dataframe.
+names(D1_D2_data)
+
+# Call the "D1_DD" variable again to print the entire contents to the screen for repeated data inspection.
+D1_DD
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+
+# Extreme Warning! You must edit the executable code in the next section to reflect the specific content that your team's use case contains.
+
+
+# Section 4. Conduct some data engineering to rename the columns based on what the Data Dictionaries for D1 and D2 revealed.
+# Use the "colnames()" function on the "D1_D2" dataframe to create an R vector of elements called "D1_D2_data_renamed_columns" that consists of the explanation labels for the column names separated by commas (,) that are defined in the D1_DD that will replace the short labels that are in the original D1 and D2 data sheets that were included in the creation of the "D1_D2_data" merged dataset.
+colnames(D1_D2_data) <- c('ID','Gender','Ethnicity','Age','Classification','What college does your major belong to?','Income (monthly)', 'Date')
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data. Each team must edit the executable code in the above line to reflect the column explanation labels that are contained in their DDs.
+
+# Use the "head()" function to show the first six rows of the content of revised "D1_D2_data" for data inspection of the results of your data engineering.
+head(D1_D2_data)
+# Warning! Dr. Mead used a random use case to create this Rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Save the renamed columns to a new variable/data frame called "D1_D2_data_renamed_columns" for later use.
+D1_D2_data_renamed_columns <- D1_D2_data
+
+# Call the "D1_D2_data_renamed_columns" variable to print the entire contents to the screen for viewing the results of your additional data engineering.
+D1_D2_data_renamed_columns
+
+# Use the "write.xlsx()" function on the "D1_D2_data_renamed_columns" variable holding the dataframe to create a separate XLSX file called "D1_D2_data_renamed_columns.xlsx" for later use.
+# After this code executes, you will see the new XLSX file show up in the content pane to the left.
+write.xlsx(D1_D2_data_renamed_columns, "D1_D2_data_renamed_columns.xlsx")
+
+# Use the "read_excel" function to load your "D1_D2_data_renamed_columns" XLSX file that you created in the above code sets.
+D1_D2_data_renamed_columns <-read_excel("D1_D2_data_renamed_columns.xlsx")
+# WARNING! Change the code in the above code line to your specific path and file name (if different from above).
+
+# Use the "head()" function to show the first six rows of the content of the "D1_D2_data_renamed_columns" variable holding the dataframe for data inspection.
+head(D1_D2_data_renamed_columns)
+# Warning! Dr. Mead used a random use case to create this rmd codebook. Each team's use case data output will look different. Each team must use their DD output to understand their data.
+
+# Do some more data engineering by creating a new dataframe called "Age_Date" by extracting just the "Age" and "Date" columns from the "D1_D2_data_renamed_columns" dataframe.
+Age_Date <- D1_D2_data_renamed_columns[, c("Date", "Age")]
+
+# Use the "head()" function to show the first five rows of the content of the "Age_Date" dataframe for data inspection of your data engineering work.
+head(Age_Date)
+
+# Use the "colnames()" function to output a list of the column names of the "Age_Date" dataframe.
+colnames(Age_Date)
+
+# Use the "summary()" function to get the descriptive statistics for the "Age" column of the "Age_Date" dataframe.
+summary(Age_Date$Age)
+
+# Use the "supply()" function to get the standard deviation of the "Age_Date" data, as the "summary()" function does not include that descriptive statistic.
+sapply(Age_Date, sd)
+
+
+# Use the "aggregate()" function to group the revised "Age_Date" dataframe by the "Date" column and use the "mean()" function on the "Age" column to show the average Age and use the "round()" function to remove decimal places and assign that all to a new variable called "processed_Age_Date"
+processed_Age_Date <- aggregate(Age_Date$Age, list(Age_Date$Date), FUN=function(Age) round(mean(Age), 0))
+
+# Use the "head()" function to show the first six rows of the content of the "processed_Age_Date" dataframe to the screen for data inspection of your data engineering and data processing work.
+head(processed_Age_Date)
+
+# Section 5. Now the "Age" and "Date" data is processed so that you can use it to create a Data Visualization (DV) to show the change in Age over time (Date).
+# For this section, work on your own by adapting and inserting below the Python code that Dr. Mead demonstrated during the Class Session 4 video called, "Activity - Experiment with R and Python Code for DVP to Show How Data Change Over Time".
+# Remember to save your codebook and download it when you are finished so that you do not lose your hard work.
+
+
+# Copy the dataframe D1_D2_data_renamed_columns to df1 and convert the Date column to Date format
+df1 <- D1_D2_data_renamed_columns
+df1$Date <- as.Date(df1$Date)
+
+# Aggregate data by month and gender, count occurrences, and pivot data wider
+result <- df1 %>%
+  mutate(Month = format(Date, "%Y-%m"), Gender = ifelse(Gender == 1, "Male", "Female")) %>%
+  group_by(Month, Gender) %>%
+  summarise(count = n()) %>%
+  pivot_wider(names_from = Gender, values_from = count, values_fill = list(count = 0)) %>%
+  arrange(Month)
+
+# Display the aggregated result using "print()" function with "result" data as the parameter.
+print(result)
+
+# Reshape data to long format for plotting
+result_long <- result %>%
+  pivot_longer(cols = c("Male", "Female"), names_to = "Gender", values_to = "count")
+
+# Plotting using ggplot2 to show monthly counts of Male and Female
+ggplot(result_long, aes(x = Month, y = count, fill = Gender)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), width = 0.7) +
+  labs(title = "Gender distribution of target customers\' (male and female) over each month",
+       x = "Month", y = "Count of occurrences of target customers") +
+  scale_fill_manual(name = "Gender", values = c("Male" = "blue", "Female" = "orange")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Aggregate data by month to calculate average age and most repeated age
+result_2 <- df1 %>%
+  mutate(Month = format(Date, "%Y-%m")) %>%
+  group_by(Month) %>%
+  summarise(
+    Average_Age = mean(Age, na.rm = TRUE),
+    Most_Repeated_Age = Mode(Age)
+  )
+# Preparing data for use with ggplot, which often requires long-format data
+#pivot_longer() is a function to reshape the data to longer format
+
+result_long_2 <- result_2 %>%
+  pivot_longer(cols = c("Average_Age", "Most_Repeated_Age"), names_to = "Metric", values_to = "Value")
+
+# Create the heatmap and Visualizing the distribution of ethnicities over time
+#intialize ggplot and Sets up the aesthetic mapping with x,y axis and fill with count color
+#geom_text adds rectangular tiles to the plot and fill color gradient with scale_fill_gradient() function
+#theme_minimal()used to create a minimal theme to the plot
+ggplot(result_long_2, aes(x = as.Date(paste0(Month, "-01")), y = Value, color = Metric)) +
+  geom_line(size = 1) +
+  geom_point(size = 3, shape = 21, fill = "white") +
+  labs(title = "How the age category (average and mode) of the target customers varies over each month",
+       x = "Month", y = "Count of occurrences of age (average and mode)") +
+  scale_color_manual(name = "Metric", values = c("Average_Age" = "blue", "Most_Repeated_Age" = "red")) +
+  theme_minimal() +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "1 month") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+#Create a new dataframe variable df4 and displays first 6 rows of dataframe.
+df4 <- D1_D2_data_renamed_columns
+head(D1_D2_data_renamed_columns)
+
+
+# Convert Date to Month-Year
+#create new column Month-Year in df4 dataframe
+#uses floor_date() function from the lubridate package which we installed
+df4$Month_Year <- floor_date(df4$Date, "month")
+
+# Converts the 'Ethnicity' column in df4 to a factor categorical variable
+df4$Ethnicity <- as.factor(df4$Ethnicity)
+
+# Sort by Month-Year
+df4 <- df4 %>% arrange(Month_Year)
+
+# Create a pivot table for the heatmap
+#df4 pipe opeartor takes output and passes to first argument of next function
+#count() is a dpylr package function which we installed above
+heatmap_data <- df4 %>%
+  count(Ethnicity, Month_Year) %>%
+  pivot_wider(names_from = Month_Year, values_from = n, values_fill = 0)
+
+# Preparing data for use with ggplot, which often requires long-format data
+#pivot_longer() is a function of tidyr package to reshape the data to longer format
+heatmap_data_long <- heatmap_data %>%
+  pivot_longer(cols = -Ethnicity, names_to = "Month_Year", values_to = "Count")
+
+# Create the heatmap and Visualizing the distribution of ethnicities over time
+#intialize ggplot and Sets up the aesthetic mapping with x,y axis and fill with count color
+#geom_text adds rectangular tiles to the plot and fill color gradient with scale_fill_gradient() function
+#theme_minimal()used to create a minimal theme to the plot
+ggplot(heatmap_data_long, aes(x = Month_Year, y = Ethnicity, fill = Count)) +
+  geom_tile() +
+  geom_text(aes(label = Count), color = "black", size = 3) +
+  scale_fill_gradient(low = "yellow", high = "red") +
+  labs(title = "How the ethnicity of target customers distributed over each month",
+       x = "Month_Year",
+       y = "Distribution of target customers Ethnicity",
+       fill = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save the ggplot into png format 
+#ggsave("ethnicity_heatmap.png", width = 15, height = 8, units = "in")

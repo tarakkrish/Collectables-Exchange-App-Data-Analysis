@@ -1,0 +1,259 @@
+# Create a basic line chart that shows change over time in R using an CSV file.
+# Dataset source: https://serc.carleton.edu/hydromodules/steps/td1.html
+# The data used in this Activity are Streamflow in cubic feet per second
+
+# Install packages if required (This is a non-optimized code documentation line. You will learn to optimize your code-documentation skills as you move along in the course.)
+if(!require("rmarkdown")) install.packages("rmarkdown")
+if(!require("readxl")) install.packages("readxl")
+if(!require("tidyverse")) install.packages("tidyverse")
+if(!require("scales")) install.packages("scales")
+if(!require("ggplot2")) install.packages("ggplot2")
+
+# Use the "library()" function to load the libraries neccesaary for this activity.
+library(rmarkdown)
+library(readxl)
+library(tidyverse)
+library(scales)
+library(ggplot2) # Use the "library()" function to load a library called "ggpolot" for creating data visualizations.
+
+# Use the "read_excel()" function to load a dataset called "Class_Session_5_Activity.xlsx" and assign it to a variable called "data"
+data <- read_excel("Class_Session_5_Activity.xlsx")
+
+# Use the "excel_sheets()" function to extract the names of the sheets after you assign the dataset to a variable.
+path <- "Class_Session_5_Activity.xlsx"
+path %>%
+ excel_sheets()
+
+# To read just one sheet to a dataframe
+data <- read_excel("Class_Session_5_Activity.xlsx", 1) # "1" will load the first sheet in the xlsx file. Experiment with changing "1" to anotheravailable sheet number that you want to look at.
+
+# Show the first 6 rows of a dataset (A non-optimized code documentation line.)
+head(data)
+
+# Show the entire dataset (A non-optimized code documentation line.)
+view(data)
+
+# Read more about all above from the sources: https://dominicroye.github.io/en/2019/import-excel-sheets-with-r/
+# and https://rveryday.wordpress.com/2016/11/29/examine-a-data-frame-in-r-with-7-basic-functions/
+
+# Do some data engineering to make separate dataframes for years 2020 and 2021
+data_2020 <- subset(data, data$Year==2020)
+data_2021 <- subset(data, data$Year==2021)
+
+# Show the entire data subset (A non-optimized code documentation line.)
+view(data_2020)
+view(data_2021)
+
+# Do some data engineering to define some variables and to create some additional new variables for potential use later. (We might not actually use them in this Activity, but It's good practice.)
+ethnicity20 <- data_2020$Ethnicity
+poverty20 <- data_2020$Poverty
+sum_p_2020 <- sum(data_2020$Poverty)
+ethnicity21 <- data_2021$Ethnicity
+poverty21 <- data_2021$Poverty
+sum_p_2021 <- sum(data_2021$Poverty)
+percent_p_2020 <- percent(poverty20/sum_p_2020)
+percent_p_2021 <- percent(poverty21/sum_p_2021)
+
+# Create a customized pie DV to show the composition of the poverty data for the year 2020. R
+g <- ggplot(data_2020, aes(x = "", y = poverty20, fill = ethnicity20)) + geom_col(color = "white") + ggtitle("2020 U.S. Poverty by Ethnicity") + geom_text(aes(x = 1.5, label = percent_p_2020), position = position_stack(vjust = 0.5)) + coord_polar("y") + scale_fill_brewer(palette = 'Set1') + theme_void() + theme(plot.title = element_text(hjust = 0.5)) + theme(legend.title=element_blank())
+
+g # Call the "g" variable created in a previous step to show the data visualization (DV) on the screen.
+
+# If optimal, use the "ggsave()" function to to save your DV as a stand-alone image asset (file).
+ggsave("Poverty_by_Ethnicity_2020-pie-R.jpeg") # Experiment with creating different stand-alone image asset file formats, e.g., .png or .jpg or .pdf
+
+# If your computer screen is small, you will have an issue with the the percentage data labels in the pie DV overlapping each other.
+# Try recreating the pie DV with the addition of a package called "ggrepel" to manipulate the labels.
+if(!require("ggrepel")) install.packages("ggrepel")
+library(ggrepel)
+
+g <- ggplot(data_2020, aes(x = "", y = poverty20, fill = ethnicity20)) + geom_col(color = "white") +  ggtitle("2020 U.S. Poverty by Ethnicity") +  geom_label_repel(aes(label = percent_p_2020), position = position_stack(vjust = 0.5), show.legend = FALSE) +  coord_polar("y") +  scale_fill_brewer(palette = 'Set1') +  theme_void() +  theme(plot.title = element_text(hjust = 0.5)) + theme(legend.title = element_blank())
+
+g # Call the revised "g" variable created in a previous step to show the revised data visualization (DV) on the screen.
+
+# If optimal, use the "ggsave()" function to to save your DV as a stand-alone image asset (file).
+ggsave("Poverty_by_Ethnicity_2020-pie2-R.jpeg") # Experiment with creating different stand-alone image asset file formats, e.g., .png or .jpg or .pdf
+
+# Alternative for creating stand-alone image asset file in the RStudio Cloud web-based IDE: Expand the boundaries of the "Plots" pane in the RStudio Cloud web-based IDE until the labels of your DV are clearly visible and not overlapping one another. Then click "export" and save your chart as an image asset (.png file).
+# Experiment with setting different colors on your R DV: https://ggplot2-book.org/scales-colour.html
+# Learn how to customize your R DV here: https://r-graph-gallery.com/index.html
+
+# Create a copy the code for the 2020 year pie chart on this slide and edit it in all relevant parts to create a pie DV for poverty by the same demographic that you used for 2021. This will allow for visual comparisons between the two data compositions. 
+# Don't forget to download your completed .Rmd codebook for later reuse.
+
+g2 <- ggplot(data_2021, aes(x = "", y = poverty21, fill = ethnicity21)) + geom_col(color = "white") +  ggtitle("2021 U.S. Poverty by Ethnicity") +  geom_label_repel(aes(label = percent_p_2021), position = position_stack(vjust = 0.5), show.legend = FALSE) +  coord_polar("y") +  scale_fill_brewer(palette = 'Set1') +  theme_void() +  theme(plot.title = element_text(hjust = 0.5)) + theme(legend.title = element_blank())
+
+g2 # Call the revised "g2" variable created in a previous step to show the revised data visualization (DV) on the screen.
+
+# If optimal, use the "ggsave()" function to to save your DV as a stand-alone image asset (file).
+ggsave("Poverty_by_Ethnicity_2021-pie-R.jpeg") # Experiment with creating different stand-alone image asset file formats, e.g., .png or .jpg or .pdf
+
+# Experiment with repeating the above code sections (R1, R2, R3) to visualize a different sheet (variable) in the dataset, such as Gender, Age, Nativity, Region, Work, Education. Note: this will require you to make several edits in the code to get it to work for that specific variable.
+
+# Experiment with making a donut DV for 2020 by repeating the code for a pie chart but "cutting a hole" in the center of it. R
+# Create test data by hand for this session, and we will experiment with optimization in a future session.
+data <- data.frame(
+ category = c("White", "White, not Hispanic", "Black", "Asian", "American Indian and Alaska Native", "Two or More Races", "Hispanic"),
+ count = c(42.71, 33.45, 7.49, 3.49, 0.68, 1.58, 10.59)
+)
+
+data$fraction <- data$count / sum(data$count) # To compute percentages
+data$ymax <- cumsum(data$fraction) # To compute cumulative percentages to set a top boundary
+data$ymin <- c(0, head(data$ymax, n = -1)) # To compute the bottom boundary
+data$labelPosition <- (data$ymax + data$ymin) / 2 # To compute data label position
+data$label <- paste0(data$category, "\nValue: ", round(data$count, 1), "%") # To display the label with percentage sign
+
+explode <- c(0, 0, 0, -0.6, -0.05, -0.52, 0) # Define an explode effect
+
+ggplot(data, aes(ymax = ymax, ymin = ymin, xmax = 4 + explode, xmin = 3 + explode, fill = category)) +
+ geom_rect() +
+ geom_label(aes(x = 4 + explode, y = labelPosition, label = label), size = 4) +
+ scale_fill_brewer(palette = "Set3") +
+ coord_polar(theta = "y") +
+ xlim(c(2, 4)) +
+ theme_void() +
+ ggtitle("2020 U.S. Poverty by Ethnicity") +
+ theme(legend.position = "none",
+ plot.title = element_text(hjust = 0.5, size = 18)) # Center the plot title
+ 
+ggsave("Poverty_by_Ethnicity_2020-donut-R.png", width = 7, height = 7, dpi = 300) # Experiment with image asset format, size and quality.
+
+# Experiment with making a basic horizontal bar DV with the data.
+New_Colors <- c('green', 'blue', 'purple', 'brown', 'black', 'orange', 'gray') # Data engineer a new variable to define some colors that to use in the DV.
+# Experiment with the different colors to customize your DV.
+g <- ggplot(data_2020, aes(x = poverty20, y = reorder(ethnicity20, poverty20))) + # To order the ethnicity categories by highest (on top) to lowest (on bottom) on the DV
+ geom_bar(stat = "identity", fill = New_Colors) + # Use your "New_Colors" variable here
+ labs(title = "2020 U.S. Poverty by Ethnicity", x = "People Living in Poverty", y = "") + # To remove the unnecessary y-axis label
+ theme_minimal() +
+ theme(axis.text.y = element_text(size = 10)) + # To adjust y-axis text size
+ scale_x_continuous(labels = comma) + # To add commas to the numbers on the x-axis
+ guides(fill = FALSE) # To remove legend for fill colors
+ 
+g + coord_flip() # To flip coordinates to create horizontal bars for optimal viewing
+
+g # Call the variable to show the DV
+
+ggsave("Poverty_by_Ethnicity_2020-bar-R.png") # Experiment with image asset format, size and quality.
+# Don't forget to download your completed .Rmd codebook for later reuse.
+
+#End of the  activity.
+
+# To read just one sheet to a dataframe
+df1 <- read_excel("Class_Session_5_Activity.xlsx", 2) # "1" will load the first sheet in the xlsx file. Experiment with changing "1" to anotheravailable sheet number that you want to look at.
+
+# Show the first 6 rows of a dataset (A non-optimized code documentation line.)
+head(df1)
+
+# Data provided
+#data <- data.frame(Year = c(2020, 2020, 2021, 2021),Gender = c("Male", "Female", "Male", "Female"),Poverty = c(161565, 166006, 161793, 166398))
+
+# Filter data for the year 2020
+data_2020 <- df1 %>% filter(Year == 2020)
+
+# Calculate percentage
+data_2020 <- data_2020 %>% 
+  mutate(Percentage = Poverty / sum(Poverty) * 100)
+
+# Create donut chart for 2020
+ggplot(data_2020, aes(x = 2, y = Percentage, fill = Gender)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  xlim(0.5, 2.5) +
+  theme_void() +
+  theme(legend.position = "right") +
+  ggtitle("Poverty Distribution by Gender in 2020") +
+  geom_text(aes(label = paste0(round(Percentage, 2), "%")), 
+            position = position_stack(vjust = 0.5))
+            
+ggsave("Poverty_by_Gender_2020-donut-R.png") # Experiment with image asset format, size and quality.
+
+# Filter data for the year 2021
+data_2021 <- df1 %>% filter(Year == 2021)
+
+# Calculate percentage
+data_2021 <- data_2021 %>% 
+  mutate(Percentage = Poverty / sum(Poverty) * 100)
+
+# Create donut chart for 2021
+ggplot(data_2021, aes(x = 2, y = Percentage, fill = Gender)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  xlim(0.5, 2.5) +
+  theme_void() +
+  theme(legend.position = "right") +
+  ggtitle("Poverty Distribution by Gender in 2021") +
+  geom_text(aes(label = paste0(round(Percentage, 2), "%")), 
+            position = position_stack(vjust = 0.5))
+
+ggsave("Poverty_by_Gender_2021-donut-R.png") # Experiment with image asset format, size and quality.
+
+#2020 work sheet graph 
+# Read the Excel file with read_excel() function 
+xlsx <- read_excel("Class_Session_5_Activity.xlsx", sheet = "Work")
+
+# Filter data for the year 2020 which creates a new dataframe df3_2020 
+df3_2020 <- xlsx[xlsx$Year == 2020, ]
+
+# Create the bar plot
+# geom_bar() fucntion creates the bars and stat = "identity" means the height of the bar
+# geom_text() adds text to the plot
+# labs() is used to set various labels in the plot
+ggplot(df3_2020, aes(x = Work, y = Poverty)) +
+  geom_bar(stat = "identity", fill = c("#FC0FC0", "#CCFF00")) +
+  geom_text(aes(label = format(Poverty, big.mark = ",")), 
+            vjust = -0.5, size = 4) +
+  labs(title = "2020 U.S. Poverty by Work Status",
+       y = "Poverty Count",
+       x = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save the plot with ggsave() function
+ggsave("Poverty_by_Work_2020_bar-R.png", width = 10, height = 6, dpi = 300)
+
+#2021 work sheet graph
+# Read the Excel file with read_excel() function 
+df3 <- read_excel("Class_Session_5_Activity.xlsx", sheet = "Work")
+
+# Filter df3 for the year 2021 and store in df3_2021
+df3_2021 <- df3 %>% filter(Year == 2021)
+
+# Reset the index of df3_2021
+df3_2021 <- df3_2021 %>% mutate(new_index = row_number())
+
+# Remove the new_index column if it's not needed
+df3_2021 <- df3_2021 %>% select(-new_index)
+
+# Print df3_2021
+print(df3_2021)
+
+# Extract 'Work' and 'Poverty' columns
+Work21 <- df3_2021$Work
+poverty21 <- df3_2021$Poverty
+
+# Create the bar plot
+# geom_bar() fucntion creates the bars and stat = "identity" means the height of the bar
+# geom_text() adds text to the plot
+# labs() is used to set various labels in the plot
+ggplot(df3_2021, aes(x = Work, y = Poverty)) +
+  # Create bars
+  geom_bar(stat = "identity", fill = c("#FFFF00", "#6F00FF")) +
+  
+  # Add value labels on top of each bar
+  geom_text(aes(label = format(Poverty, big.mark = ",")), 
+            vjust = -0.5, size = 4) +
+  
+  # Set labels and title
+  labs(title = "2021 U.S. Poverty by Work Status",
+       y = "Poverty Count",
+       x = "") +
+  
+  # Use a minimal theme
+  theme_minimal() +
+  
+  # Rotate x-axis labels for better readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save the plot
+ggsave("Poverty_by_Work_2021_bar-R.png", width = 10, height = 6, dpi = 300)
+

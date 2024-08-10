@@ -1,0 +1,95 @@
+# Install required packages if not already installed
+# These packages are essential for data manipulation, visualization, and Excel file reading
+if(!require("readxl")) install.packages("readxl")  
+if(!require("ggplot2")) install.packages("ggplot2")  
+if(!require("dplyr")) install.packages("dplyr")   
+if(!require("ggrepel")) install.packages("ggrepel") 
+
+# Load libraries
+# These libraries provide functions used throughout the script
+library(readxl)  # For reading Excel files
+library(ggplot2)  
+library(dplyr)  
+library(ggrepel)  # used to prevent overlapping of text labels in plots
+
+# Read the Excel file
+# 'read_excel()' is used to import data from an Excel file into R
+D1 <- read_excel("O-Collectables Exchange App-D1.xlsx")  # Read the entire Excel file
+D1_data <- read_excel(D1, sheet = "Data")  # Extract the Data sheet
+D1_DD <- read_excel(D1, sheet = "Data Dictionary")  # Extract the Data Dictionary sheet
+
+# Rename columns using the Data Dictionary
+# ensures that the column names in D1_data match the identifiers in the Data Dictionary
+l <- D1_DD$`Identification Number`  # Extract identification numbers from Data Dictionary
+names(D1_data)[2:7] <- l[1:6]  # Assign these names to columns 2-7 in D1_data
+
+# Process gender data for donut chart
+# prepares the data for the gender-based donut chart
+gender_counts <- D1_data %>%
+  group_by(Gender) %>%  # Group the data by gender
+  summarise(count = n()) %>%  # Count the number of occurrences for each gender
+  mutate(
+    Gender = case_when(  # Convert numeric gender codes to descriptive labels
+      Gender == 1 ~ "Male",
+      Gender == 2 ~ "Female",
+      TRUE ~ as.character(Gender)
+    ),
+    fraction = count / sum(count),  # Calculate the fraction of each gender
+    ymax = cumsum(fraction),  # Calculate the cumulative sum for positioning
+    ymin = c(0, head(ymax, n = -1)),  # Calculate the starting position for each segment
+    labelPosition = (ymax + ymin) / 2,  # Calculate the middle position for labels
+    label = paste0(Gender, "\n", round(fraction * 100, 2), "%")  # Create label text
+  )
+
+# Create the donut chart
+# ggplot2 to create a donut chart visualization
+donut_chart <- ggplot(gender_counts, aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3, fill = Gender)) +
+  geom_rect() +  # Create the donut segments
+  geom_label(aes(x = 3.5, y = labelPosition, label = label), size = 4) +  # Add labels
+  scale_fill_manual(values = c("Male" = "skyblue", "Female" = "pink")) +  # Set custom colors
+  coord_polar(theta = "y") +  # Convert to polar coordinates for circular shape
+  xlim(c(2, 4)) +  # Set x limits to create donut hole
+  theme_void() +  # Remove unnecessary elements
+  ggtitle("Count by Gender") +  
+  theme(legend.position = "left",  #legend on the left
+        plot.title = element_text(hjust = 0.5, size = 18))  # Center and size the title
+
+# Display and save the donut chart
+print(donut_chart)  
+ggsave("Count_by_Gender-donut-R.png", plot = donut_chart, width = 12, height = 7, dpi = 80)  # Save as PNG file
+
+# Process age data for pie chart
+# This section prepares the data for the age-based pie chart
+age_counts <- D1_data %>%
+  group_by(Age) %>%  # Group the data by age
+  summarise(count = n()) %>%  # Count the number of occurrences for each age
+  mutate(Age = ifelse(count < 5, "Other", as.character(Age))) %>%  # Group ages with less than 5 occurrences
+  group_by(Age) %>%  # Regroup after combining small categories
+  summarise(count = sum(count)) %>%  # Sum the counts for each age group
+  mutate(
+    percentage = count / sum(count) * 100,  # Calculate percentage for each age group
+    label = paste0(round(percentage, 2), "%")  
+  )
+
+# Create the pie chart
+# This section uses ggplot2 to create a pie chart visualization
+pie_chart <- ggplot(age_counts, aes(x = "", y = count, fill = Age)) +
+  geom_col(color = "white") +  # Create the pie segments
+  ggtitle("2022 U.S. Count by Age Distribution") + 
+  geom_label_repel(aes(label = label),  # Add labels with smart positioning
+                   position = position_stack(vjust = 0.5), 
+                   show.legend = FALSE) +
+  coord_polar("y") +  # Convert to polar coordinates for circular shape
+  scale_fill_brewer(palette = 'Set1') +  # Use a predefined color palette
+  theme_void() +  # Remove unnecessary elements
+  theme(plot.title = element_text(hjust = 0.5),  # Center the title
+        legend.title = element_blank())  # Remove legend title
+
+# Display and save the pie chart
+print(pie_chart)  
+ggsave("Count_by_Age_2022-pie-R.png", plot = pie_chart, width = 12, height = 7, dpi = 80)  # Save as PNG file
+
+
+
+
+

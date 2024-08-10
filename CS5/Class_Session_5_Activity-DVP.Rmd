@@ -1,0 +1,82 @@
+# Create a basic line chart that shows change over time in R using an CSV file.
+# Dataset source: https://serc.carleton.edu/hydromodules/steps/td1.html
+# The data used in this Activity are Streamflow in cubic feet per second
+
+# Install packages if required (This is a non-optimized code documentation line. You will learn to optimize your code-documentation skills as you move along in the course.)
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("dplyr")) install.packages("dplyr")
+
+# Load a library (A non-optimized code documentation line.)
+library(ggplot2)
+library(dplyr)
+
+# Load a CSV file (A non-optimized code documentation line.)
+data1 <- read.csv("Class_Session_4_Activity.csv")
+
+data1$Date = as.Date(data1$Date, "%m/%d/%y") # To make sure the Date column is in the format that we want.
+
+# Show the first 6 rows of a dataset (A non-optimized code documentation line.)
+head(data1)
+
+# Show the entire dataset (A non-optimized code documentation line.)
+data1
+
+# Show the column names (A non-optimized code documentation line.)
+names(data1)
+
+#Show the description statistics of a dataset (A non-optimized code documentation line.)
+summary(data1)
+
+#show the standard deviations of the variables in a dataset (A non-optimized code documentation line.)
+sapply(data1, sd)
+
+# Basic line chart of a variable over time that includes assigning DV-creation code to a variable 
+g1 <- ggplot(data1, aes(Date, Streamflow)) + geom_line(color = "blue") + scale_y_continuous("Streamflow (cfs)") + ggtitle("Streamflow Over Time") + ylab("Streamflow (cfs)") + scale_x_date(date_labels = "%m/%d/%Y") + theme(plot.title=element_text(hjust=0.5), axis.title.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.text.x = element_text(angle=45))
+
+g1 # To show the DV on the screen
+
+ggsave("streamflow-CSV-R.jpeg") # To save the R DV to a file. Change it to .jpg if you want a .png
+
+# Experiment with ways to customize your R Line Chart DV here: https://r-graph-gallery.com/line-plot.html
+
+
+# Create a basic line chart that shows change over time in R using an XLSX file.
+
+if(!require("readxl")) install.packages("readxl")
+
+# Load a library (A non-optimized code documentation line.)
+library(readxl)
+
+# Load an XLSX file (A non-optimized code documentation line.)
+data2<-read_excel("Class_Session_4_Activity.xlsx")
+
+data2$Date = as.Date(data2$Date, "%m/%d/%y") # To make sure the Date column is in the format that we want.
+
+# Show the first 6 rows of a dataset (A non-optimized code documentation line.)
+head(data2)
+
+# Show the entire dataset (A non-optimized code documentation line.)
+data2
+
+#Show the column name (A non-optimized code documentation line.)
+names(data2)
+
+# Use the "summary()" function to Show the description statistics of a dataset that was assigned to a variable called "data2".
+summary(data2)
+
+#Use the "sapply()" function that contains an argument "sd" to show the standard deviations of the variables in a dataset that was assigned to a variable caled "data2".
+sapply(data2, sd)
+
+#show the standard deviations of the variables in a dataset (A non-optimized code documentation line.)
+g2 <- ggplot(data2, aes(Date, Streamflow)) + geom_line(color = "blue") + scale_y_continuous("Streamflow (cfs)") + ggtitle("Streamflow Over Time") + ylab("Streamflow (cfs)") + scale_x_date(date_labels = "%m/%d/%Y") + theme(plot.title=element_text(hjust=0.5), axis.title.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.text.x = element_text(angle=45))
+
+g1 # To show the DV on the screen
+
+ggsave("streamflow-XLSX-R.jpeg") # To save the R DV to a file. Change it to .jpg if you want a .jpg
+
+# Experiment with ways to customize your R Line Chart DV here: https://r-graph-gallery.com/line-plot.html
+
+
+
+#End of the  activity.
+

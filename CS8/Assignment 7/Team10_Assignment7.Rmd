@@ -1,0 +1,80 @@
+# Install 'rmarkdown' package if not installed
+if(!require("rmarkdown")) install.packages("rmarkdown")
+
+# Install 'readxl' package if not already installed
+if(!require("readxl")) install.packages("readxl")
+
+# Install 'leaflet' package if not installed
+if(!require("leaflet")) install.packages("leaflet")
+
+# Install 'htmlwidgets' package if not installed
+if(!require("htmlwidgets")) install.packages("htmlwidgets")
+
+# Install 'dplyr' package if not already installed
+if(!require("dplyr")) install.packages("dplyr")
+
+# Load the 'rmarkdown' package for R Markdown rendering
+library(rmarkdown)
+
+# Load the 'readxl' package to read Excel files
+library(readxl)
+
+# Load the 'leaflet' package for interactive maps
+library(leaflet)
+
+# Load the 'htmlwidgets' package to save widgets as HTML
+library(htmlwidgets)
+
+# Load the 'dplyr' package for data manipulation
+library(dplyr)
+
+# Create a base map centered around San Diego
+m <- leaflet() %>%
+  setView(lng = -117.1611, lat = 32.7157, zoom = 9) %>%
+  addProviderTiles("Esri.WorldStreetMap")
+
+# Read the coordinates from the Use Case D8 dataset
+coordinates <- read_excel("D8.xlsx")
+
+# Display the contents of the coordinates dataframe
+print(coordinates)
+
+#Using a loop to add markers for each coordinate in the coordinates dataframe
+for (i in 1:nrow(coordinates)) {
+  m <- addMarkers(map = m,
+                  lng = coordinates$Longitude[i],
+                  lat = coordinates$Latitude[i])
+}
+
+# Save the map to an HTML file
+saveWidget(m, file = "map.html", selfcontained = TRUE)
+
+# Read the D5 dataset
+D5 <- read_excel("O-Collectables Exchange App-D5.xlsx")
+
+# Display the first few rows of D5
+print(head(D5))
+
+# Create a new map for collectables preferences with clustering
+m_collectables <- leaflet() %>%
+  setView(lng = -117.1611, lat = 32.7157, zoom = 10) %>%
+  addProviderTiles("Esri.WorldStreetMap")
+
+# Prepare the data for clustering
+marker_data <- coordinates %>%
+  mutate(popup = paste("User", row_number(), ":", D5$`What do you want in a collectables exchange app?`))
+
+# Add clustered markers with popups
+m_collectables <- m_collectables %>%
+  addMarkers(data = marker_data,
+             lng = ~Longitude,
+             lat = ~Latitude,
+             popup = ~popup,
+             clusterOptions = markerClusterOptions())
+
+# Save the collectables preferences map
+saveWidget(m_collectables, file = "collectables_preferences_map.html", selfcontained = TRUE)
+
+
+
+

@@ -1,0 +1,122 @@
+# Use if condition to check and install the "readxl" package if not already installed.
+if(!require("readxl")) install.packages("readxl") 
+
+# Use if condition to check and install the "ggplot2" package if not already installed.
+if(!require("ggplot2")) install.packages("ggplot2") 
+
+# Use if condition to check and install the "dplyr" package if not already installed.
+if(!require("dplyr")) install.packages("dplyr") 
+
+# Use if condition to check and install the "tidyr" package if not already installed.
+if(!require("tidyr")) install.packages("tidyr") 
+
+# Use library() to load the "readxl" package for reading Excel files.
+library(readxl) 
+
+# Use library() to load the "ggplot2" package for plotting.
+library(ggplot2) 
+
+# Use library() to load the "dplyr" package for data manipulation.
+library(dplyr) 
+
+# Use library() to load the "tidyr" package for data tidying.
+library(tidyr) 
+
+# Use read_excel() to read the "Data" sheet from the Excel file into the variable "D4_data".
+D4_data <- read_excel("O-Collectables Exchange App-D4.xlsx", sheet = "Data")
+
+# Use read_excel() to read the "Data Dictionary" sheet from the Excel file into the variable "D4_DD".
+D4_DD <- read_excel("O-Collectables Exchange App-D4.xlsx", sheet = "Data Dictionary")
+
+# Manually create a named vector for mapping column names in "D4_data".
+column_mapping <- c(
+    ID = "ID",
+    Q12 = "How many hours per day do you watch TV, including online?",
+    Q13 = "How many hours per day do you listen to the radio, including online?",
+    Q14 = "How many hours per week do you read magazines, including online?",
+    Q15 = "How many hours per week do you read newspapers, including online?"
+)
+
+# Use names() to rename the columns in "D4_data" using the "column_mapping" vector.
+names(D4_data) <- column_mapping[names(D4_data)]
+
+# Print new column names to the console for debugging.
+print("New Column Names:")
+print(names(D4_data))
+
+# Print the first few rows of the updated DataFrame for inspection.
+print("\nFirst few rows of updated DataFrame:")
+print(head(D4_data))
+
+# Use a vector to create custom labels for the x-axis in plots.
+labels_xaxis_manual <- c('Never', 'Less than 1 hour', '1 to almost 3 hours', '3 to almost 5 hours', '5 to almost 7 hours', '7 to almost 9 hours', '9 to almost hours','11 and more hours')
+
+# Use ggplot() to initialize a histogram plot for TV watching hours from "D4_data".
+p <- ggplot(D4_data, aes(x=`How many hours per day do you watch TV, including online?`)) + 
+  geom_histogram(binwidth=1, fill="skyblue", color="black") + 
+  labs(title="How frequently do the Collectables Exchange App target customers watch the TV per day (including online)?",
+       x="Viewing Frequency Levels", 
+       y = "Target Customers Count per Viewing Frequency Levels") + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_x_continuous(breaks=0:7, labels=labels_xaxis_manual) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+# Use print() to display the histogram plot.
+print(p)
+
+# Use ggsave() to save the histogram plot as a PNG file.
+ggsave("How frequently do the Collectables Exchange App target customers listen to the radio per day (including online)?-hist.png", plot = p, width = 10, height = 6, dpi = 300)
+
+# Use ggplot() to initialize a histogram plot for radio listening hours from "D4_data".
+p <- ggplot(D4_data, aes(x=`How many hours per day do you listen to the radio, including online?`)) + 
+  geom_histogram(binwidth=1, fill="skyblue", color="black") + 
+  labs(title="How frequently do the Collectables Exchange App target customers listen to the radio per day (including online)?",
+       x="Viewing Frequency Levels", 
+       y = "Target Customers Count per Viewing Frequency Levels") + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_x_continuous(breaks=0:7, labels=labels_xaxis_manual) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+# Use print() to display the histogram plot.
+print(p)
+
+# Use ggsave() to save the histogram plot as a PNG file.
+ggsave("Distribution of People Engagement with Radio-hist.png", plot = p, width = 10, height = 6, dpi = 300)
+
+# Use select() from dplyr to select only the TV and Radio columns from "D4_data".
+df2 <- D4_data %>%
+  select(`How many hours per day do you watch TV, including online?`,
+         `How many hours per day do you listen to the radio, including online?`)
+
+# Use names() to rename columns in "df2" for clarity.
+names(df2) <- c("TV", "Radio")
+
+# Use pivot_longer() from tidyr to convert data to long format.
+df2_long <- df2 %>%
+  tidyr::pivot_longer(cols = everything(), names_to = "Media", values_to = "Hours")
+
+# Use ggplot() to initialize a boxplot for TV and Radio hours from "df2_long".
+p <- ggplot(df2_long, aes(x = Media, y = Hours, fill = Media)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("#FF6347", "#4682B4")) +  # Colors for TV and Radio
+  labs(title = "Comparison of Time Spent by Target Customers Between TV and Radio",
+       x = "Target Customers Count per Viewing Frequency Levels",
+       y = "How Target customers spent their time") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
+  scale_x_discrete(labels = c("TV", "Radio")) +
+  coord_cartesian(ylim = c(0, max(df2_long$Hours))) +
+  geom_hline(yintercept = seq(0, max(df2_long$Hours), by = 1), 
+             linetype = "dashed", color = "gray", alpha = 0.7)
+
+# Use print() to display the boxplot.
+print(p)
+
+# Use ggsave() to save the boxplot as a PNG file.
+ggsave("Comparison of Time Spent by Target Customers Between TV and Radio.png", plot = p, width = 10, height = 6, dpi = 300)

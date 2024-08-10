@@ -1,0 +1,124 @@
+# Install 'readxl' package if not already installed
+if(!require("readxl")) install.packages("readxl")
+
+# Install 'dplyr' package if not already installed
+if(!require("dplyr")) install.packages("dplyr")
+
+# Install 'ggplot2' package if not already installed
+if(!require("ggplot2")) install.packages("ggplot2")
+
+# Install 'GGally' package if not already installed
+if(!require("GGally")) install.packages("GGally")
+
+# Load the 'readxl' package for reading Excel files
+library(readxl)
+
+# Load the 'dplyr' package for data manipulation
+library(dplyr)
+
+# Load the 'ggplot2' package for data visualization
+library(ggplot2)
+
+# Load the 'GGally' package for advanced visualizations
+library(GGally)
+
+# Read the 'Data' sheet from the Excel file
+D7 <- readxl::read_excel('O-Collectables Exchange App-D7.xlsx', sheet = "Data")
+
+# Read the 'Data Dictionary' sheet from the Excel file
+D7_DD <- readxl::read_excel('O-Collectables Exchange App-D7.xlsx', sheet = "Data Dictionary")
+
+# Check if the file was read correctly by ensuring 'D7' is not null and has rows
+if(is.null(D7) || nrow(D7) == 0) {
+  stop("Error reading the Excel file. Please check the file path and sheet name.")
+}
+
+# Print column names of 'D7' to the console
+print(colnames(D7))
+
+# Select the first 10 columns from 'D7' and assign to 'df1'
+df1 <- D7[, 1:10]
+
+# Use dplyr to select and rename columns from 'df1', removing 'ID' and 'Q27'
+df2 <- df1 %>% 
+  select(-ID, -Q27) %>% 
+  rename(
+    Monday = Q20,
+    Tuesday = Q21,
+    Wednesday = Q22,
+    Thursday = Q23,
+    Friday = Q24,
+    Saturday = Q25,
+    Sunday = Q26,
+    Midday = Q28
+  )
+
+# Print column names of 'df2' to check if renaming worked
+print(colnames(df2))
+
+# Convert specified columns to numeric type using dplyr
+df2 <- df2 %>% mutate(across(c(Monday:Sunday), as.numeric))
+
+# Define a function 'mode' to calculate the mode of a numeric vector
+mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Group by 'Midday' and calculate mode for specified columns
+mode_df <- df2 %>%
+  group_by(Midday) %>%
+  summarise(across(c(Monday:Sunday), mode)) %>%
+  ungroup()
+
+# Print 'mode_df' to check the result
+print(mode_df)
+
+# Display the structure of 'mode_df' to the console
+str(mode_df)
+
+# Create a Parallel Coordinates plot using 'ggparcoord' from 'GGally'
+p <- ggparcoord(
+  data = mode_df,
+  columns = 2:8,
+  groupColumn = 1,  # Use the index of the Midday column
+  scale = "globalminmax",
+  showPoints = TRUE,
+  title = "How likely are the target customers willing\n to use the Collectables Exchange App throughout the week when compared\n with the response of time frame 12 p.m. to 4 p.m.?"
+) +
+  scale_color_gradientn(
+    colours = c("red", "violet", "blue", "green", "yellow", "orange"),
+    labels = c('I will not use', 'Highly unlikely', 'Unlikely', 'Unsure', 'Likely', 'Highly likely'),
+    breaks = seq(-3, 2, by = 1),
+    limits = c(-3, 2)
+  )
+
+# Customize the plot appearance using 'theme' and 'guides'
+p <- p +
+  theme(
+    legend.position = "right",
+    legend.box.just = "top",
+    legend.margin = margin(6, 6, 6, 6),
+    legend.box.margin = margin(0, 0, 0, 12),
+    plot.margin = unit(c(1,5,1,1), "lines"),  # Increase right margin to accommodate legend
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    plot.title = element_text(size = 10, face = "bold"),  # Customize title
+    axis.title = element_text(size = 10),  # Customize axis titles
+    axis.text = element_text(size = 8)  # Customize axis text
+  ) +
+  guides(
+    color = guide_colorbar(
+      title = "Response of target customers willing \nto utilize the app between 12 and 4 p.m.",
+      barwidth = 1,
+      barheight = 20,
+      ticks = FALSE
+    )
+  ) +
+  labs(x = "Most repeated frequency of willingness by target customers with respect to the week of the day", y = "Frequency levels of willingness by target customers throughout the week")  # Add axis labels
+
+# Save the plot as a PNG file with specified dimensions and resolution
+ggsave("StudentsPerformance-ParallelCoordinatesPlot-R.png", p, width = 18, height = 10, dpi = 300)
+
+# Print the plot to the console
+print(p)
+

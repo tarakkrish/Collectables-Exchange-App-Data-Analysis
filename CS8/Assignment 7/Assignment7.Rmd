@@ -1,0 +1,35 @@
+#ASSIGNMENT 7 - GEOGRAPHICAL DATA - D8 DATASET  OF COLLECTABLES EXCHANGE APP
+
+# Install packages if required
+if(!require("rmarkdown")) install.packages("rmarkdown") # An if statement is used for checking the condition (!) that a set of code will require that a package called "rmarkdown" is installed for working with .Rmd files and if so using the install.packages() function to install the package.
+if(!require("readxl")) install.packages("readxl") # An if statement is used for checking the condition (!) that a set of code will require that a package called "readxl" is installed for working with .xlsx files and if so using the install.packages() function to install the package.
+if(!require("openxlsx")) install.packages("openxlsx") # An if statement is used for checking the condition (!) that a set of code will require that a package called "openxlsx" is installed for manipulating .xlsx files and if so using the install.packages() function to install the package.
+if(!require("leaflet")) install.packages("leaflet") # An if statement is used for checking the condition (!) that a set of code will require that a package called "leaflet" is installed for creating dynamic online maps and if so using the install.packages() function to install the package.
+if(!require("htmlwidgets")) install.packages("htmlwidgets") # An if statement is used for checking the condition (!) that a set of code will require that a package called "htmlwidgets" is installed for providing a framework for creating R bindings to JavaScript libraries for interactive visualizations and if so using the install.packages() function to install the package.
+
+# Load the required packages/libraries
+library(rmarkdown)  # The library() function is used to load a package called "rmarkdown" for working with .Rmd files.
+library(readxl)  # The library() function is used to load a package called "readxl" for working with .xlsx files.
+library(leaflet) # The library() function is used to load a package called "leaflet" for creating dynamic online maps.
+library(htmlwidgets) # The library() function is used to load a package called "htmlwidgets" for providing a framework for creating R bindings to JavaScript libraries for interactive visualizations.
+
+# Create a map centered around San Diego using the Esri.WorldStreetMap basemap with the leaflet() function.
+m <- leaflet() %>%
+  setView(lng = -117.1611, lat = 32.7157, zoom = 9) %>%
+  addProviderTiles("Esri.WorldStreetMap")
+
+# Read the coordinates from the Use Case D8 dataset provided by Dr. Mead using the read_excel() function from the readxl package. The filename is truncated to "D8.xlsx" for this example.
+coordinates <- read_excel("D8.xlsx")
+
+# Display the contents of the coordinates variable, which contains "Latitude" and "Longitude" columns for the GPS data of the target customers in the focus group.
+coordinates
+
+# Iterate over the rows of the DataFrame and add markers for the latitude and longitude GPS data using the addMarkers() function from the leaflet library. Assign the result to the variable "m".
+for (i in 1:nrow(coordinates)) {
+  m <- addMarkers(map = m,
+                  lng = coordinates$Longitude[i],
+                  lat = coordinates$Latitude[i])
+}
+
+# Save the map to an HTML file using the saveWidget() function.
+saveWidget(m, file = "map.html", selfcontained = TRUE)

@@ -1,0 +1,130 @@
+# Install packages 
+if(!require("readxl")) install.packages("readxl") # For reading Excel files
+if(!require("ggplot2")) install.packages("ggplot2") # For plotting
+if(!require("dplyr")) install.packages("dplyr") # For data manipulation
+
+# Load required libraries
+library(readxl) # For reading Excel files
+library(ggplot2) # For plotting
+library(dplyr) # For data manipulation
+
+# Read Data sheet from the EXCEL file
+D4_data <- read_excel("O-Collectables Exchange App-D4.xlsx", sheet = "Data")
+
+# Read the 'Data Dictionary' sheet from the same Excel file
+D4_DD <- read_excel("O-Collectables Exchange App-D4.xlsx", sheet = "Data Dictionary")
+
+# Manually created dictionary to mapping column names 
+column_mapping <- c(
+    ID = "ID",
+    Q12 = "How many hours per day do you watch TV, including online?",
+    Q13 = "How many hours per day do you listen to the radio, including online?",
+    Q14 = "How many hours per week do you read magazines, including online?",
+    Q15 = "How many hours per week do you read newspapers, including online?"
+)
+
+# Rename the columns in D4_data using the column_mapping dictionary
+names(D4_data) <- column_mapping[names(D4_data)]
+
+# Display the new column names for debugging
+print("New Column Names:")
+print(names(D4_data))
+
+# Display the first few rows of the updated DataFrame
+print("\nFirst few rows of updated DataFrame:")
+print(head(D4_data))
+
+# Create Custom labels for x-axis
+labels_xaxis_manual <- c('Never','<1','1 to <3','3 to <5','5 to <7','7 to <9','9 to <11','11 or more')
+
+# Create histogram for TV watching Customers
+#Initialize a ggplot object using the D4_data dataframe
+#Add a histogram layer to the plot with geom_histogram
+#Fill the bars with a skyblue color and outline them in black
+p <- ggplot(D4_data, aes(x=`How many hours per day do you watch TV, including online?`)) + 
+  geom_histogram(binwidth=1, fill="skyblue", color="black") + 
+  labs(title="Distribution of Customers' Engagement with Television",
+       x="Daily Television Viewing Hours", 
+       y = "Number of Potential App Users") + 
+# Center-align the plot title
+# Use the custom labels defined in labels_xaxis_manual for these breaks
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_x_continuous(breaks=0:7, labels=labels_xaxis_manual) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+# Display the plot
+print(p)
+
+# Save the plot
+ggsave("Distribution of Customers' Engagement with Television-hist.png", plot = p, width = 10, height = 6, dpi = 300)
+
+
+
+# Create histogram for radio listening hours
+# Initialize a ggplot object using the D4_data dataframe
+#Add a histogram layer to the plot with geom_histogram
+#Fill the bars with a skyblue color and outline them in black
+p <- ggplot(D4_data, aes(x=`How many hours per day do you listen to the radio, including online?`)) + 
+  geom_histogram(binwidth=1, fill="skyblue", color="black") + 
+  labs(title="Distribution of Customers' Engagement with Radio",
+       x="Daily Radio listening Hours", 
+       y = "Number of Potential App Users") + 
+# Center-align the plot title
+# Use the custom labels defined in labels_xaxis_manual for these breaks       
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_x_continuous(breaks=0:7, labels=labels_xaxis_manual) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1))
+
+# Display the plot
+print(p)
+
+# Save the plot
+ggsave("Distribution of Customers' Engagement with Radio-hist.png", plot = p, width = 10, height = 6, dpi = 300)
+
+
+#Box Plot
+# Select only the TV and Radio columns
+df2 <- D4_data %>%
+  select(`How many hours per day do you watch TV, including online?`,
+         `How many hours per day do you listen to the radio, including online?`)
+
+# Rename columns 
+names(df2) <- c("TV", "Radio")
+
+# Convert data to long format
+df2_long <- df2 %>%
+  tidyr::pivot_longer(cols = everything(), names_to = "Media", values_to = "Hours")
+
+# Create the boxplot
+# Initialize a ggplot object using the df2_long dataframe
+# Apply a minimal theme to the plot for a clean look 
+p <- ggplot(df2_long, aes(x = Media, y = Hours, fill = Media)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("#FF6347", "#4682B4")) +  # Colors for TV and Radio
+  labs(title = "Time Spent on TV vs. Radio for App Design",
+       x = "Media Type ",
+       y = "Daily Hours Spent") +
+# Center-align the plot title
+# Add horizontal dashed lines at each integer y-value for easier reading
+# Lines are gray with 70% opacity
+
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
+  scale_x_discrete(labels = c("TV", "Radio")) +
+  coord_cartesian(ylim = c(0, max(df2_long$Hours))) +
+  geom_hline(yintercept = seq(0, max(df2_long$Hours), by = 1), 
+             linetype = "dashed", color = "gray", alpha = 0.7)
+
+# Display the plot
+print(p)
+
+# Save the plot
+ggsave("Time Spent on TV vs. Radio for App Design-Boxplot-R.png", plot = p, width = 10, height = 6, dpi = 300)
+
+

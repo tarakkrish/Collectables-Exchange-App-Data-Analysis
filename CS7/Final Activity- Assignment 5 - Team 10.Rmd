@@ -1,0 +1,98 @@
+# Install required packages if they're not already installed
+if (!require(readxl)) install.packages("readxl")  # For reading Excel files
+if (!require(ggplot2)) install.packages("ggplot2")  # For creating plots
+if (!require(dplyr)) install.packages("dplyr")  # For data manipulation
+if (!require(gridExtra)) install.packages("gridExtra")  # For arranging multiple plots
+if (!require(grid)) install.packages("grid")  # For low-level graphics
+
+# Load the required libraries
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(grid)
+
+# Read the Excel file, specifying the "Data" sheet
+D6 <- read_excel("O-Collectables Exchange App-D6.xlsx", sheet = "Data")
+# Read the "Data Dictionary" sheet from the same Excel file
+D6_DD <- read_excel("O-Collectables Exchange App-D6.xlsx", sheet = "Data Dictionary")
+
+# Extract the "ResponseNO" column from the Data Dictionary
+l <- D6_DD$ResponseNO
+# Rename columns Q16, Q17, Q18, Q19 in the main data frame using the extracted ResponseNO values
+colnames(D6)[colnames(D6) %in% c("Q16", "Q17", "Q18", "Q19")] <- l[1:4]
+
+# Create a copy of the dataset for manipulation
+df1 <- D6
+
+# Define the questions for app price and prime membership
+app_price <- "How much would you be willing to pay for an app that allows you to buy and sell collectable items?"
+prime_price <- "How much would you be willing to spend per month for a prime membership to an app that allows you to buy and sell collectable items?"
+
+# Get value counts for each question
+app_counts <- table(df1[[app_price]])
+prime_counts <- table(df1[[prime_price]])
+
+# Create a data frame for app price data
+app_data <- data.frame(
+  value = -as.vector(app_counts),  # Negative values for left side of the pyramid
+  group = "App Price",
+  response = factor(names(app_counts), levels = names(app_counts))  # Maintain original order
+)
+
+# Create a data frame for prime membership data
+prime_data <- data.frame(
+  value = as.vector(prime_counts),  # Positive values for right side of the pyramid
+  group = "Prime Membership",
+  response = factor(names(prime_counts), levels = names(prime_counts))  # Maintain original order
+)
+
+# Combine the two data frames
+plot_data <- rbind(app_data, prime_data)
+
+# Create the ggplot object
+p <- ggplot(plot_data, aes(x = response, y = value, fill = group)) +
+  geom_bar(stat = "identity", position = "identity") +  # Create the bars
+  scale_fill_manual(values = c("App Price" = "skyblue", "Prime Membership" = "lightgreen")) +  # Set colors
+  coord_flip() +  # Flip coordinates to make horizontal bars
+  labs(x = "Response Options", y = "Count", 
+       title = "Comparison of App Price vs Prime Membership Price") +  # Set labels
+  theme_minimal() +  # Use a minimal theme
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5, size = 16),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    plot.margin = margin(5.5, 20, 5.5, 5.5)  # Adjust plot margins
+  ) +
+  geom_text(aes(label = abs(value), 
+                hjust = ifelse(value >= 0, -0.1, 1.1)),  # Add value labels to bars
+            size = 3) +
+  geom_vline(xintercept = 0, color = "black", linetype = "solid") +  # Add center line
+  scale_x_discrete(limits = rev(sort(unique(plot_data$response))))  # Reverse y-axis order
+
+# Create text for annotations
+app_price_text <- "One-time App Price Options:\n0: I would not use\n1: $0.99 or less\n2: $1 to $1.99\n3: $2 to $2.99\n4: $3 to $3.99\n5: $4 to $4.99\n6: $5 or more"
+prime_price_text <- "Monthly Prime Membership Options:\n0: I would not use\n1: $4.99 or less\n2: $5 to $9.99\n3: $10 to $14.99\n4: $15 or more"
+
+# Create text grobs (graphical objects) for annotations
+app_grob <- textGrob(app_price_text, gp = gpar(col = "skyblue", fontsize = 9), just = "left", x = 0)
+prime_grob <- textGrob(prime_price_text, gp = gpar(col = "lightgreen", fontsize = 9), just = "left", x = 0)
+
+# Arrange the plot and annotations side by side
+final_plot <- grid.arrange(
+  p,  # The main plot
+  arrangeGrob(app_grob, prime_grob, heights = c(1,1)),  # Stack the two annotation texts
+  ncol = 2,  # Two columns: plot and annotations
+  widths = c(4, 1.2)  # Width ratio of plot to annotations
+)
+
+# Display the final plot
+print(final_plot)
+
+# Save the plot as a PNG file
+ggsave("Comparison of App Price vs Prime Membership Price-PopulationPyramid.png", 
+       plot = final_plot, width = 15, height = 8, dpi = 300)  # Set dimensions and resolution
+       
+       
+       
