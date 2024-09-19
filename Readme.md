@@ -63,3 +63,11 @@ To connect and run the code in your browser without installing anything locally,
 2. Upload the `TCP.ipynb` file along with the 8 supporting files.
 3. Open `TCP.ipynb` within the JupyterLite interface.
 4. Execute the cells to perform the analysis directly in the browser.
+
+### Output Figure-1
+
+![image](https://github.com/tarakkrish/Collectables-Exchange-App-Data-Analysis/blob/master/TCP/How%20much%20the%20target%20customers%20are%20willing%20to%20pay%20to%20use%20the%20Collectables%20Exchange%20App%20varies%20by%20gender%20distribution.png)
+
+### Output Figure-2
+
+![image](https://github.com/tarakkrish/Collectables-Exchange-App-Data-Analysis/blob/master/TCP/Average%20Likelihood%20of%20Using%20the%20Collectibles%20Exchange%20App%20by%20Ethnicity%20and%20Day.png)
