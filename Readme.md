@@ -51,3 +51,15 @@ See the
 [documentation](https://jupyterlite.readthedocs.io/en/stable/quickstart/deploy.html) for
 more details.
 
+# TCP Analysis Project
+
+This repository contains 9 files, including the main analysis in the `TCP.ipynb` file, with 8 supporting files that detail the steps and learning process.
+
+## How to Run the Project with JupyterLite
+
+To connect and run the code in your browser without installing anything locally, follow these steps:
+
+1. Visit [JupyterLite](https://jupyterlite.readthedocs.io/en/stable/try/lab).
+2. Upload the `TCP.ipynb` file along with the 8 supporting files.
+3. Open `TCP.ipynb` within the JupyterLite interface.
+4. Execute the cells to perform the analysis directly in the browser.
